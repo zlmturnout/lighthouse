@@ -1062,6 +1062,15 @@ describe('GatherRunner', function() {
       expect(GatherRunner.getNonHtmlError(mainRecord)).toBeUndefined();
     });
 
+    it('passes when the page is of MIME type application/xhtml+xml', () => {
+      const url = 'http://the-page.com';
+      const mainRecord = new NetworkRequest();
+      const mimeType = 'application/xhtml+xml';
+      mainRecord.url = url;
+      mainRecord.mimeType = mimeType;
+      expect(GatherRunner.getNonHtmlError(mainRecord)).toBeUndefined();
+    });
+
     it('fails when the page is not of MIME type text/html', () => {
       const url = 'http://the-page.com';
       const mimeType = 'application/xml';

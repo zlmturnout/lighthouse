@@ -248,13 +248,14 @@ class GatherRunner {
   static getNonHtmlError(finalRecord) {
     // MIME types are case-insenstive but Chrome normalizes MIME types to be lowercase.
     const HTML_MIME_TYPE = 'text/html';
-
+    const XHTML_MIME_TYPE = 'application/xhtml+xml';
+    
     // If we never requested a document, there's no doctype error, let other cases handle it.
     if (!finalRecord) return undefined;
 
     // mimeType is determined by the browser, we assume Chrome is determining mimeType correctly,
     // independently of 'Content-Type' response headers, and always sending mimeType if well-formed.
-    if (HTML_MIME_TYPE !== finalRecord.mimeType) {
+    if (finalRecord.mimeType !== HTML_MIME_TYPE && finalRecord.mimeType !== XHTML_MIME_TYPE) {
       return new LHError(LHError.errors.NOT_HTML, {mimeType: finalRecord.mimeType});
     }
     return undefined;
