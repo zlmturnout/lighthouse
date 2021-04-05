@@ -1210,6 +1210,24 @@ describe('GatherRunner', function() {
       expect(error.message).toEqual('NOT_HTML');
     });
 
+    it('warns with XHTML type', () => {
+      const passContext = {
+        url: 'http://the-page.com',
+        passConfig: {loadFailureMode: LoadFailureMode.fatal},
+        baseArtifacts: {LighthouseRunWarnings: []}
+      };
+      const mainRecord = new NetworkRequest();
+      const loadData = {networkRecords: [mainRecord]};
+
+      mainRecord.url = passContext.url;
+      mainRecord.mimeType = 'application/xhtml+xml';
+
+      const error = GatherRunner.getPageLoadError(passContext, loadData, undefined);
+      expect(error).toBeUndefined();
+      const warnings = JSON.stringify(passContext.baseArtifacts.LighthouseRunWarnings);
+      expect(warnings.includes('warningXhtml')).toBe(true);
+    });
+
     it('fails with nav error last', () => {
       const passContext = {
         url: 'http://the-page.com',
