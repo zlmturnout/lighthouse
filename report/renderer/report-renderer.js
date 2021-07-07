@@ -26,7 +26,7 @@
 /** @typedef {import('./category-renderer')} CategoryRenderer */
 /** @typedef {import('./dom.js')} DOM */
 
-/* globals self, Util, DetailsRenderer, CategoryRenderer, I18n, PerformanceCategoryRenderer, PwaCategoryRenderer, ElementScreenshotRenderer */
+/* globals self, Util, DetailsRenderer, CategoryRenderer, I18n, PerformanceCategoryRenderer, PwaCategoryRenderer, ElementScreenshotRenderer, TemplateComponents */
 
 class ReportRenderer {
   /**
@@ -69,7 +69,7 @@ class ReportRenderer {
    * @return {DocumentFragment}
    */
   _renderReportTopbar(report) {
-    const el = this._dom.cloneTemplate('#tmpl-lh-topbar', this._templateContext);
+    const el = TemplateComponents.topbar(this._dom);
     const metadataUrl = this._dom.find('a.lh-topbar__url', el);
     metadataUrl.href = metadataUrl.textContent = report.finalUrl;
     metadataUrl.title = report.finalUrl;
@@ -237,7 +237,7 @@ class ReportRenderer {
     }
 
     if (scoreHeader) {
-      const scoreScale = this._dom.cloneTemplate('#tmpl-lh-scorescale', this._templateContext);
+      const scoreScale = TemplateComponents.scorescale(this._dom)
       const scoresContainer = this._dom.find('.lh-scores-container', headerContainer);
       scoreHeader.append(
         ...this._renderScoreGauges(report, categoryRenderer, specificCategoryRenderers));

@@ -23,6 +23,7 @@ function concatRendererCode() {
     fs.readFileSync(__dirname + '/../report/renderer/pwa-category-renderer.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/report-renderer.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/i18n.js', 'utf8'),
+    fs.readFileSync(__dirname + '/../report/renderer/template-components.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/text-encoding.js', 'utf8'),
   ].join(';\n');
 }
