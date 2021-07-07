@@ -29,18 +29,18 @@
 function scorescale(dom) {
   const div1 = dom.createElement('div');
   div1.className = 'lh-scorescale';
-  const span1 = dom.createElement('span');
-  span1.className = 'lh-scorescale-range lh-scorescale-range--fail';
-  div1.appendChild(span1);
-  span1.textContent = '0–49';
-  const span2 = dom.createElement('span');
-  span2.className = 'lh-scorescale-range lh-scorescale-range--average';
-  div1.appendChild(span2);
-  span2.textContent = '50–89';
-  const span3 = dom.createElement('span');
-  span3.className = 'lh-scorescale-range lh-scorescale-range--pass';
-  div1.appendChild(span3);
-  span3.textContent = '90–100';
+
+  const ranges = [
+    ['lh-scorescale-range--fail', '0–49'],
+    ['lh-scorescale-range--average', '50–89'],
+    ['lh-scorescale-range--pass', '90–100'],
+  ];
+
+  for (const [classNameModifier, text] of ranges) {
+    const span = dom.createElement('span', `lh-scorescale-range ${classNameModifier}`);
+    span.textContent = text;
+    div1.append(span);
+  }
   return div1;
 }
 
@@ -54,13 +54,14 @@ function topbar(dom) {
   const div1 = dom.createElement('div', 'lh-topbar');
 
   // LH logo in svg
-  const svg1 = dom.createElement('svg', 'lh-topbar__logo', {
+  const svg1 = dom.createElementSVG('svg', {
     'viewBox': '0 0 24 24',
   });
+  svg1.classList.add('lh-topbar__logo');
   div1.append(svg1);
   const defs1 = dom.createElementSVG('defs');
   svg1.append(defs1);
-  const lineargradient1 = dom.createElementSVG('lineargradient', {
+  const lineargradient1 = dom.createElementSVG('linearGradient', {
     'x1': '57.456%',
     'y1': '13.086%',
     'x2': '18.259%',
@@ -80,7 +81,7 @@ function topbar(dom) {
     'offset': '100%',
   });
   lineargradient1.append(stop2);
-  const lineargradient2 = dom.createElementSVG('lineargradient', {
+  const lineargradient2 = dom.createElementSVG('linearGradient', {
     'x1': '100%',
     'y1': '50%',
     'x2': '0%',
@@ -100,7 +101,7 @@ function topbar(dom) {
     'offset': '100%',
   });
   lineargradient2.append(stop4);
-  const lineargradient3 = dom.createElementSVG('lineargradient', {
+  const lineargradient3 = dom.createElementSVG('linearGradient', {
     'x1': '58.764%',
     'y1': '65.756%',
     'x2': '36.939%',
@@ -120,7 +121,7 @@ function topbar(dom) {
     'offset': '100%',
   });
   lineargradient3.append(stop6);
-  const lineargradient4 = dom.createElementSVG('lineargradient', {
+  const lineargradient4 = dom.createElementSVG('linearGradient', {
     'x1': '41.635%',
     'y1': '20.358%',
     'x2': '72.863%',
@@ -146,7 +147,7 @@ function topbar(dom) {
   });
   svg1.append(g1);
   const path1 = dom.createElementSVG('path', {
-    'd': 'M12 3l4.125 2.625v3.75H18v2.25h-1.688l1.5 9.375H6.188l1.5-9.375H6v-2.25h1.875V5.648L12 3zm2.201 9.938L9.54 14.633 9 18.028l5.625-2.062-.424-3.028zM12.005 5.67l-1.88 1.207v2.498h3.75V6.86l-1.87-1.19z',
+    'd': 'M12 3l4.125 2.625v3.75H18v2.25h-1.688l1.5 9.375H6.188l1.5-9.375H6v-2.25h1.875V5.648L12 3zm2.201 9.938L9.54 14.633 9 18.028l5.625-2.062-.424-3.028zM12.005 5.67l-1.88 1.207v2.498h3.75V6.86l-1.87-1.19z', // eslint-disable-line max-len
     'fill': '#F44B21',
   });
   g1.append(path1);
@@ -207,7 +208,9 @@ function topbar(dom) {
     'aria-controls': 'lh-tools-dropdown',
   });
   div2.append(button1);
-  const svg2 = dom.createElement('svg', {
+
+  // 3-dots SVG
+  const svg2 = dom.createElementSVG('svg', {
     'width': '100%',
     'height': '100%',
     'viewBox': '0 0 24 24',
@@ -219,7 +222,7 @@ function topbar(dom) {
   });
   svg2.append(path8);
   const path9 = dom.createElementSVG('path', {
-    'd': 'M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+    'd': 'M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z', // eslint-disable-line max-len
   });
   svg2.append(path9);
   const div3 = dom.createElement('div', 'lh-tools__dropdown', {
