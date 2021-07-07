@@ -16,7 +16,7 @@
  */
 'use strict';
 
-/* globals self Util */
+/* globals self Util, TemplateComponents */
 
 /** @typedef {HTMLElementTagNameMap & {[id: string]: HTMLElement}} HTMLElementByTagName */
 /** @template {string} T @typedef {import('typed-query-selector/parser').ParseSelector<T, Element>} ParseSelector */
@@ -30,6 +30,8 @@ class DOM {
     this._document = document;
     /** @type {string} */
     this._lighthouseChannel = 'unknown';
+    /** @type {Map<string, HTMLElement>} */
+    this.componentCache = new Map();
   }
 
   /**
@@ -119,6 +121,23 @@ class DOM {
     template.setAttribute('data-stamped', 'true');
 
     return clone;
+  }
+
+  /**
+   * @param {LH.Renderer.componentIds} id
+   * @returns {HTMLElement}
+   * @throws {Error}
+   */
+  getComponent(id) {
+    if (!this.componentCache.has(id)) {
+      if (!TemplateComponents || typeof TemplateComponents[id] !== 'function') {
+        throw new Error(`DOM template component for ${id} not found`);
+      }
+      const elem = TemplateComponents[id](this);
+      this.componentCache.set(id, elem);
+    }
+    const goldenEl = /** @type {HTMLElement} */ (this.componentCache.get(id));
+    return /** @type {HTMLElement} */ (goldenEl.cloneNode(true));
   }
 
   /**

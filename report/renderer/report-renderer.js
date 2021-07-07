@@ -26,7 +26,7 @@
 /** @typedef {import('./category-renderer')} CategoryRenderer */
 /** @typedef {import('./dom.js')} DOM */
 
-/* globals self, Util, DetailsRenderer, CategoryRenderer, I18n, PerformanceCategoryRenderer, PwaCategoryRenderer, ElementScreenshotRenderer, TemplateComponents */
+/* globals self, Util, DetailsRenderer, CategoryRenderer, I18n, PerformanceCategoryRenderer, PwaCategoryRenderer, ElementScreenshotRenderer */
 
 class ReportRenderer {
   /**
@@ -66,10 +66,10 @@ class ReportRenderer {
 
   /**
    * @param {LH.ReportResult} report
-   * @return {DocumentFragment}
+   * @return {HTMLElement}
    */
   _renderReportTopbar(report) {
-    const el = TemplateComponents.topbar(this._dom);
+    const el = this._dom.getComponent('topbar');
     const metadataUrl = this._dom.find('a.lh-topbar__url', el);
     metadataUrl.href = metadataUrl.textContent = report.finalUrl;
     metadataUrl.title = report.finalUrl;
@@ -237,7 +237,7 @@ class ReportRenderer {
     }
 
     if (scoreHeader) {
-      const scoreScale = TemplateComponents.scorescale(this._dom)
+      const scoreScale = this._dom.getComponent('scorescale');
       const scoresContainer = this._dom.find('.lh-scores-container', headerContainer);
       scoreHeader.append(
         ...this._renderScoreGauges(report, categoryRenderer, specificCategoryRenderers));
@@ -260,9 +260,9 @@ class ReportRenderer {
     }
 
     const reportFragment = this._dom.createFragment();
-    const topbarDocumentFragment = this._renderReportTopbar(report);
+    const topBarEl = this._renderReportTopbar(report);
 
-    reportFragment.appendChild(topbarDocumentFragment);
+    reportFragment.appendChild(topBarEl);
     reportFragment.appendChild(reportContainer);
     reportContainer.appendChild(headerContainer);
     reportContainer.appendChild(reportSection);

@@ -10,6 +10,7 @@ const fs = require('fs');
 function concatRendererCode() {
   return [
     fs.readFileSync(__dirname + '/../report/renderer/util.js', 'utf8'),
+    fs.readFileSync(__dirname + '/../report/renderer/template-components.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/dom.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/details-renderer.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/crc-details-renderer.js', 'utf8'),
@@ -23,7 +24,6 @@ function concatRendererCode() {
     fs.readFileSync(__dirname + '/../report/renderer/pwa-category-renderer.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/report-renderer.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/i18n.js', 'utf8'),
-    fs.readFileSync(__dirname + '/../report/renderer/template-components.js', 'utf8'),
     fs.readFileSync(__dirname + '/../report/renderer/text-encoding.js', 'utf8'),
   ].join(';\n');
 }
