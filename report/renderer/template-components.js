@@ -17,7 +17,7 @@
 /** @typedef {import('./dom.js')} DOM */
 
 /**
- *
+ * Lighthouse score scale
  * @param {DOM} dom
  * @return {HTMLDivElement}
  */
@@ -41,7 +41,7 @@ function scorescale(dom) {
 
 
 /**
- *
+ * Lighthouse header
  * @param {DOM} dom
  * @return {HTMLDivElement}
  */
@@ -252,8 +252,73 @@ function topbar(dom) {
   return div1;
 }
 
+/**
+ * Lighthouse audit
+ * @param {DOM} dom
+ * @return {HTMLDivElement}
+ */
+function audit(dom) {
+  const div1 = dom.createElement('div', 'lh-audit');
+  const details1 = dom.createElement('details', 'lh-expandable-details');
+  div1.append(details1);
+  const summary1 = dom.createElement('summary');
+  const div2 = dom.createElement('div', 'lh-audit__header lh-expandable-details__summary');
+  summary1.append(div2);
+  const span1 = dom.createElement('span', 'lh-audit__score-icon');
+  const span2 = dom.createElement('span', 'lh-audit__title-and-text');
+  const span3 = dom.createElement('span', 'lh-audit__title');
+  const span4 = dom.createElement('span', 'lh-audit__display-text');
+  span2.append(span3, span4);
+  const div3 = dom.createElement('div', 'lh-chevron-container');
+  div2.append(span1, span2, div3);
+  const div4 = dom.createElement('div', 'lh-audit__description');
+  const div5 = dom.createElement('div', 'lh-audit__stackpacks');
+  details1.append(summary1, div4, div5);
+  return div1;
+}
+
+/**
+ * Lighthouse perf opportunity
+ * @param {DOM} dom
+ * @return {HTMLDivElement}
+ */
+function opportunity(dom) {
+  const div1 = dom.createElement('div', 'lh-audit lh-audit--load-opportunity');
+  const details1 = dom.createElement('details', 'lh-expandable-details');
+  div1.append(details1);
+  const summary1 = dom.createElement('summary');
+  const div2 = dom.createElement('div', 'lh-audit__header lh-expandable-details__summary');
+  summary1.append(div2);
+  const div3 = dom.createElement('div', 'lh-load-opportunity__cols');
+  div2.append(div3);
+  const div4 = dom.createElement('div', 'lh-load-opportunity__col lh-load-opportunity__col--one');
+  const span1 = dom.createElement('span', 'lh-audit__score-icon');
+  const div5 = dom.createElement('div', 'lh-audit__title');
+  div4.append(span1, div5);
+  const div6 = dom.createElement('div', 'lh-load-opportunity__col lh-load-opportunity__col--two');
+  div3.append(div4, div6);
+  const div7 = dom.createElement('div', 'lh-load-opportunity__sparkline');
+  const div8 = dom.createElement('div', 'lh-sparkline');
+  div7.append(div8);
+  const div9 = dom.createElement('div', 'lh-sparkline__bar');
+  div8.append(div9);
+  const div10 = dom.createElement('div', 'lh-audit__display-text');
+  const div11 = dom.createElement('div', 'lh-chevron-container');
+  div6.append(div7, div10, div11);
+  const div12 = dom.createElement('div', 'lh-audit__description');
+  const div13 = dom.createElement('div', 'lh-audit__stackpacks');
+  details1.append(summary1, div12, div13);
+  return div1;
+}
+
+/**
+ * Lighthouse perf opportunity
+ * @param {DOM} dom
+ * @return {HTMLDivElement}
+ */
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {scorescale, topbar};
+  module.exports = {scorescale, topbar, audit, opportunity};
 } else {
-  self.TemplateComponents = {scorescale, topbar};
+  self.TemplateComponents = {scorescale, topbar, audit, opportunity};
 }

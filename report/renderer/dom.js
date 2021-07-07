@@ -100,6 +100,7 @@ class DOM {
   }
 
   /**
+   * @deprecated Please migrate to a template component instead.
    * @param {string} selector
    * @param {ParentNode} context
    * @return {!DocumentFragment} A clone of the template content.
@@ -113,12 +114,10 @@ class DOM {
 
     const clone = this._document.importNode(template.content, true);
 
-    // Prevent duplicate styles in the DOM. After a template has been stamped
-    // for the first time, remove the clone's styles so they're not re-added.
-    if (template.hasAttribute('data-stamped')) {
-      this.findAll('style', clone).forEach(style => style.remove());
+    const style = this.findAll('style', clone);
+    if (style.length) {
+      throw new Error('CSS should be added to style.css instead');
     }
-    template.setAttribute('data-stamped', 'true');
 
     return clone;
   }

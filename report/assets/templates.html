@@ -23,15 +23,6 @@ limitations under the License.
   </div>
 </template>
 
-<!-- Lighthouse score scale -->
-<template id="tmpl-lh-scorescale">
-  <div class="lh-scorescale">
-      <span class="lh-scorescale-range lh-scorescale-range--fail">0&ndash;49</span>
-      <span class="lh-scorescale-range lh-scorescale-range--average">50&ndash;89</span>
-      <span class="lh-scorescale-range lh-scorescale-range--pass">90&ndash;100</span>
-  </div>
-</template>
-
 <!-- Toggle arrow chevron -->
 <template id="tmpl-lh-chevron">
   <svg class="lh-chevron" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100">
@@ -87,26 +78,6 @@ limitations under the License.
   </div>
 </template>
 
-<!-- Lighthouse audit -->
-<template id="tmpl-lh-audit">
-  <div class="lh-audit">
-    <details class="lh-expandable-details">
-      <summary>
-        <div class="lh-audit__header lh-expandable-details__summary">
-          <span class="lh-audit__score-icon"></span>
-          <span class="lh-audit__title-and-text">
-            <span class="lh-audit__title"></span>
-            <span class="lh-audit__display-text"></span>
-          </span>
-          <div class="lh-chevron-container"></div>
-        </div>
-      </summary>
-      <div class="lh-audit__description"></div>
-      <div class="lh-audit__stackpacks"></div>
-    </details>
-  </div>
-</template>
-
 <!-- Lighthouse perf metric -->
 <template id="tmpl-lh-metric">
   <div class="lh-metric">
@@ -118,32 +89,6 @@ limitations under the License.
   </div>
 </template>
 
-<!-- Lighthouse perf opportunity -->
-<template id="tmpl-lh-opportunity">
-  <div class="lh-audit lh-audit--load-opportunity">
-    <details class="lh-expandable-details">
-        <summary>
-          <div class="lh-audit__header lh-expandable-details__summary">
-            <div class="lh-load-opportunity__cols">
-              <div class="lh-load-opportunity__col lh-load-opportunity__col--one">
-                <span class="lh-audit__score-icon"></span>
-                <div class="lh-audit__title"></div>
-              </div>
-              <div class="lh-load-opportunity__col lh-load-opportunity__col--two">
-                <div class="lh-load-opportunity__sparkline">
-                  <div class="lh-sparkline"><div class="lh-sparkline__bar"></div></div>
-                </div>
-                <div class="lh-audit__display-text"></div>
-                <div class="lh-chevron-container"></div>
-              </div>
-            </div>
-          </div>
-        </summary>
-      <div class="lh-audit__description"></div>
-      <div class="lh-audit__stackpacks"></div>
-    </details>
-  </div>
-</template>
 
 <!-- Lighthouse perf opportunity header -->
 <template id="tmpl-lh-opportunity-header">
@@ -166,64 +111,6 @@ limitations under the License.
   </div>
 </template>
 
-<!-- Lighthouse topbar -->
-<template id="tmpl-lh-topbar">
-
-
-  <div class="lh-topbar">
-    <!-- Lighthouse logo.  -->
-    <svg class="lh-topbar__logo" viewBox="0 0 24 24">
-      <defs>
-        <linearGradient x1="57.456%" y1="13.086%" x2="18.259%" y2="72.322%" id="lh-topbar__logo--a">
-          <stop stop-color="#262626" stop-opacity=".1" offset="0%"/>
-          <stop stop-color="#262626" stop-opacity="0" offset="100%"/>
-        </linearGradient>
-        <linearGradient x1="100%" y1="50%" x2="0%" y2="50%" id="lh-topbar__logo--b">
-          <stop stop-color="#262626" stop-opacity=".1" offset="0%"/>
-          <stop stop-color="#262626" stop-opacity="0" offset="100%"/>
-        </linearGradient>
-        <linearGradient x1="58.764%" y1="65.756%" x2="36.939%" y2="50.14%" id="lh-topbar__logo--c">
-          <stop stop-color="#262626" stop-opacity=".1" offset="0%"/>
-          <stop stop-color="#262626" stop-opacity="0" offset="100%"/>
-        </linearGradient>
-        <linearGradient x1="41.635%" y1="20.358%" x2="72.863%" y2="85.424%" id="lh-topbar__logo--d">
-          <stop stop-color="#FFF" stop-opacity=".1" offset="0%"/>
-          <stop stop-color="#FFF" stop-opacity="0" offset="100%"/>
-        </linearGradient>
-      </defs>
-      <g fill="none" fill-rule="evenodd">
-        <path d="M12 3l4.125 2.625v3.75H18v2.25h-1.688l1.5 9.375H6.188l1.5-9.375H6v-2.25h1.875V5.648L12 3zm2.201 9.938L9.54 14.633 9 18.028l5.625-2.062-.424-3.028zM12.005 5.67l-1.88 1.207v2.498h3.75V6.86l-1.87-1.19z" fill="#F44B21"/>
-        <path fill="#FFF" d="M14.201 12.938L9.54 14.633 9 18.028l5.625-2.062z"/>
-        <path d="M6 18c-2.042 0-3.95-.01-5.813 0l1.5-9.375h4.326L6 18z" fill="url(#lh-topbar__logo--a)" fill-rule="nonzero" transform="translate(6 3)"/>
-        <path fill="#FFF176" fill-rule="nonzero" d="M13.875 9.375v-2.56l-1.87-1.19-1.88 1.207v2.543z"/>
-        <path fill="url(#lh-topbar__logo--b)" fill-rule="nonzero" d="M0 6.375h6v2.25H0z" transform="translate(6 3)"/>
-        <path fill="url(#lh-topbar__logo--c)" fill-rule="nonzero" d="M6 6.375H1.875v-3.75L6 0z" transform="translate(6 3)"/>
-        <path fill="url(#lh-topbar__logo--d)" fill-rule="nonzero" d="M6 0l4.125 2.625v3.75H12v2.25h-1.688l1.5 9.375H.188l1.5-9.375H0v-2.25h1.875V2.648z" transform="translate(6 3)"/>
-      </g>
-    </svg>
-
-    <a href="" class="lh-topbar__url" target="_blank" rel="noopener"></a>
-
-    <div class="lh-tools">
-      <button id="lh-tools-button" class="lh-tools__button" title="Tools menu" aria-label="Toggle report tools menu" aria-haspopup="menu" aria-expanded="false" aria-controls="lh-tools-dropdown">
-        <svg width="100%" height="100%" viewBox="0 0 24 24">
-            <path d="M0 0h24v24H0z" fill="none"/>
-            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-        </svg>
-      </button>
-      <div id="lh-tools-dropdown" role="menu" class="lh-tools__dropdown" aria-labelledby="lh-tools-button">
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--print" data-i18n="dropdownPrintSummary" data-action="print-summary"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--print" data-i18n="dropdownPrintExpanded" data-action="print-expanded"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--copy" data-i18n="dropdownCopyJSON" data-action="copy"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--download" data-i18n="dropdownSaveHTML" data-action="save-html"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--download" data-i18n="dropdownSaveJSON" data-action="save-json"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--open" data-i18n="dropdownViewer" data-action="open-viewer"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--open" data-i18n="dropdownSaveGist" data-action="save-gist"></a>
-        <a role="menuitem" tabindex="-1" href="#" class="report-icon report-icon--dark" data-i18n="dropdownDarkTheme" data-action="toggle-dark"></a>
-      </div>
-    </div>
-  </div>
-</template>
 
 <!-- Lighthouse header -->
 <template id="tmpl-lh-heading">

@@ -92,7 +92,7 @@ declare global {
     }
     export module Renderer {
       /** String enum of possible component ids to clone */
-      export type componentIds = 'scorescale' | 'topbar';
+      export type componentIds = 'scorescale' | 'topbar' | 'audit' | 'opportunity';
     }
   }
 }
