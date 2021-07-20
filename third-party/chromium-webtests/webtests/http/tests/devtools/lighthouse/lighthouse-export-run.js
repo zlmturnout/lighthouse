@@ -21,24 +21,6 @@
         (filename, content) => resolve(content));
     });
   }
-
-  async function testExportHtml() {
-    const reportHtmlPromise = waitForSave();
-    toolsMenu.querySelector('a[data-action="save-html"').click();
-    const reportHtml = await reportHtmlPromise;
-
-    let auditElements = resultsElement.querySelectorAll('.lh-audit');
-    TestRunner.addResult(`\n# of .lh-audit divs (original): ${auditElements.length}`);
-
-    const exportedReportIframe = resultsElement.ownerDocument.createElement('iframe');
-    exportedReportIframe.srcdoc = reportHtml;
-    resultsElement.parentElement.append(exportedReportIframe);
-    await new Promise(resolve => exportedReportIframe.addEventListener('load', resolve));
-
-    auditElements = exportedReportIframe.contentDocument.querySelectorAll('.lh-audit');
-    TestRunner.addResult(`\n# of .lh-audit divs (exported html): ${auditElements.length}`);
-  }
-
   async function testExportJson() {
     const reportJsonPromise = waitForSave();
     toolsMenu.querySelector('a[data-action="save-json"').click();
@@ -46,9 +28,6 @@
     const lhr = JSON.parse(reportJson);
     TestRunner.addResult(`\n# of audits (json): ${Object.keys(lhr.audits).length}`);
   }
-
-  TestRunner.addResult('++++++++ testExportHtml');
-  await testExportHtml();
 
   TestRunner.addResult('\n++++++++ testExportJson');
   await testExportJson();

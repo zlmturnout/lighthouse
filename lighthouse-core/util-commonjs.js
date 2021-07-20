@@ -591,8 +591,6 @@ Util.UIStrings = {
   dropdownPrintExpanded: 'Print Expanded',
   /** Option in a dropdown menu that copies the Lighthouse JSON object to the system clipboard. */
   dropdownCopyJSON: 'Copy JSON',
-  /** Option in a dropdown menu that saves the Lighthouse report HTML locally to the system as a '.html' file. */
-  dropdownSaveHTML: 'Save as HTML',
   /** Option in a dropdown menu that saves the Lighthouse JSON object to the local system as a '.json' file. */
   dropdownSaveJSON: 'Save as JSON',
   /** Option in a dropdown menu that opens the current report in the Lighthouse Viewer Application. */

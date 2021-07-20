@@ -493,17 +493,6 @@ export class ReportUIFeatures {
         this._saveFile(new Blob([jsonStr], {type: 'application/json'}));
         break;
       }
-      case 'save-html': {
-        const htmlStr = this.getReportHtml();
-        try {
-          this._saveFile(new Blob([htmlStr], {type: 'text/html'}));
-        } catch (/** @type {Error} */ e) {
-          this._fireEventOn('lh-log', this._document, {
-            cmd: 'error', msg: 'Could not export as HTML. ' + e.message,
-          });
-        }
-        break;
-      }
       case 'open-viewer': {
         ReportUIFeatures.openTabAndSendJsonReportToViewer(this.json);
         break;
@@ -670,16 +659,6 @@ export class ReportUIFeatures {
         }
       });
     }
-  }
-
-  /**
-   * Returns the html that recreates this report.
-   * @return {string}
-   * @protected
-   */
-  getReportHtml() {
-    this._resetUIState();
-    return this._document.documentElement.outerHTML;
   }
 
   /**

@@ -40,15 +40,6 @@ class ViewerUIFeatures extends ReportUIFeatures {
   }
 
   /**
-   * Uses ReportGenerator to create the html that recreates this report.
-   * @return {string}
-   * @override
-   */
-  getReportHtml() {
-    return ReportGenerator.generateReportHtml(this.json);
-  }
-
-  /**
    * @override
    */
   saveAsGist() {
