@@ -4,26 +4,34 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-
 declare global {
   module LH.Renderer {
     export function renderFullReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
-    export function renderReportComponents(lhr: LH.Result, options?: ReportRendererOptions): ReportComponents
+    export function renderReportComponents(
+      lhr: LH.Result,
+      options?: ReportRendererOptions
+    ): ReportComponents;
 
     export function getFinalScreenshot(): void | string;
 
-    // Convenience for folks:
-    // category handles a bunch of plugin, n/a, and error cases. groupDefs needed only for PWA
-    export function renderGaugeForCategory(category: LH.ReportCategory, groupDefinitions?: Object<string, LH.Result.ReportGroup>): HTMLElement;
-    export function renderGaugeForScore(num0to1: number): HTMLElement // maybe?
+    // Render gauge for a category
+    // category handles a bunch of plugin, n/a, and error cases. groupDefinitions only needed for PWA
+    export function renderGaugeForCategory(
+      category: LH.ReportCategory,
+      groupDefinitions?: Record<string, LH.Result.ReportGroup>
+    ): HTMLElement;
+
+    // Extra convience if you have just a category score.
+    export function renderGaugeForScore(num0to1: number): HTMLElement;
   }
 
+  // TODO(paulirish): Refactor DOM to match. https://github.com/GoogleChrome/lighthouse/issues/12254#issuecomment-877520562
   type ReportComponents = {
-    topbarEl: HTMLElement,
-    mainEl: HTMLElement,
-    headerEl: HTMLElement,
-    categoriesEl: HTMLElement,
-    footerEl: HTMLElement
+    topbarEl: HTMLElement;
+    mainEl: HTMLElement;
+    headerEl: HTMLElement;
+    categoriesEl: HTMLElement;
+    footerEl: HTMLElement;
   };
 
   interface ReportRendererOptions {
@@ -31,7 +39,7 @@ declare global {
      * Between stacking contexts and z-index, the overlayParentEl should have a stacking/paint order high enough to cover all elements that the overlay should paint above.
      * Defaults to the containerEl, but will be set in PSI to avoid being under the sticky header.
      * @see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
-    overlayParentEl?: HTMLElement
+    overlayParentEl?: HTMLElement;
 
     /** Callback running after a DOM element (like .lh-node or .lh-source-location) has been created */
     onDetailsItemRendered?: (type: string, el: HTMLElement, value: any) => void;
@@ -41,14 +49,12 @@ declare global {
     disableAutoDarkModeAndFireworks?: boolean;
 
     /** If defined, the 'Save as Gist' item in the topbar dropdown will be shown and when clicked, will run this function. */
-    onSaveGist?: (lhr: LH.Result) => string
+    onSaveGist?: (lhr: LH.Result) => string;
 
     /** If defined, when the 'Save/Copy as HTML' items are clicked, this fn will be used instead of `documentElement.outerHTML`. */
-    getStandaloneReportHTML?: () => string
+    getStandaloneReportHTML?: () => string;
   }
-
 }
 
-
 // empty export to keep file a module
-export {}
+export {};
