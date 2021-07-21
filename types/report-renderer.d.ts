@@ -7,27 +7,30 @@
 
 declare global {
   module LH.Renderer {
-    class ReportRenderer {
-      constructor(lhr: LH.Result, options?: ReportRendererOptions);
+    export function renderFullReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
+    export function renderReportComponents(lhr: LH.Result, options?: ReportRendererOptions): ReportComponents
 
-      getContainerEl(): HTMLElement;
-      getTopBarEl(): HTMLElement;
+    export function getFinalScreenshot(): void | string;
 
-
-      // No need for PSI mode. it'll just getContainerEl and get solo-cat mode and pull the scoregauge out, and remove the footer.
-      getFinalScreenshot(): void | string;
-
-      // Convenience for folks:
-      // category handles a bunch of plugin, n/a, and error cases. groupDefs needed only for PWA
-      renderGaugeForCategory(category: LH.ReportCategory, groupDefinitions?: Object<string, LH.Result.ReportGroup>): HTMLElement;
-      renderGaugeForScore(num0to1: number): HTMLElement // maybe?
-    }
+    // Convenience for folks:
+    // category handles a bunch of plugin, n/a, and error cases. groupDefs needed only for PWA
+    export function renderGaugeForCategory(category: LH.ReportCategory, groupDefinitions?: Object<string, LH.Result.ReportGroup>): HTMLElement;
+    export function renderGaugeForScore(num0to1: number): HTMLElement // maybe?
   }
+
+  type ReportComponents = {
+    topbarEl: HTMLElement,
+    mainEl: HTMLElement,
+    headerEl: HTMLElement,
+    categoriesEl: HTMLElement,
+    footerEl: HTMLElement
+  };
 
   interface ReportRendererOptions {
     /** DOM element that will the overlay DOM should be a child of.
-     * Must z-index overlay everything it should.
-     * Defaults to the containerEl, but will be set in PSI to avoid being under the sticky header. */
+     * Between stacking contexts and z-index, the overlayParentEl should have a stacking/paint order high enough to cover all elements that the overlay should paint above.
+     * Defaults to the containerEl, but will be set in PSI to avoid being under the sticky header.
+     * @see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
     overlayParentEl?: HTMLElement
 
     /** Callback running after a DOM element (like .lh-node or .lh-source-location) has been created */
