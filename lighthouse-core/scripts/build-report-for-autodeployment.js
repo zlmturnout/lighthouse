@@ -11,16 +11,9 @@
 const fs = require('fs');
 const path = require('path');
 const swapLocale = require('../lib/i18n/swap-locale.js');
-
-// Must build before importing report-generator.
-const br = require('../../build/build-report.js');
-br.buildStandaloneReport();
-br.buildPsiReport();
-
 const ReportGenerator = require('../../report/report-generator.js');
 const {defaultSettings} = require('../config/constants.js');
 const lighthouse = require('../index.js');
-
 const lhr = /** @type {LH.Result} */ (require('../../lighthouse-core/test/results/sample_v2.json'));
 const {LH_ROOT} = require('../../root.js');
 
@@ -36,15 +29,12 @@ const DIST = path.join(LH_ROOT, `dist/now`);
     'ɑrabic': swapLocale(lhr, 'ar').lhr,
     'xl-accented': swapLocale(lhr, 'en-XL').lhr,
     'error': errorLhr,
-    'psi': generatePsiLHR(lhr),
-    'soloperf': generatePsiLHR(lhr),
   };
 
   // Generate and write reports
   Object.entries(filenameToLhr).forEach(([filename, lhr]) => {
-    const [reportTemplate, reportJs] = filename === 'psi' ? readPsiAssets() : [,];
-    let html = ReportGenerator.generateReportHtml(lhr, reportTemplate, reportJs);
-
+    let html = ReportGenerator.generateReportHtml(lhr);
+    // TODO: PSI is another variant to consider
     for (const variant of ['', '⌣.cdt.']) {
       if (variant.includes('cdt')) {
         // TODO: Make the DevTools Audits panel "emulation" more comprehensive
@@ -71,31 +61,6 @@ function addPluginCategory(lhr) {
     score: 0.5,
     auditRefs: [],
   };
-}
-
-/**
- * @param {LH.Result} lhr
- */
-function generatePsiLHR(lhr) {
-  const clone = JSON.parse(JSON.stringify(lhr));
-  clone.categories = {
-    'performance': clone.categories.performance,
-  };
-  // no budgets in PSI
-  delete clone.audits['performance-budget'];
-  clone.categories.performance.auditRefs = clone.categories.performance.auditRefs.filter(audit => {
-    return !audit.id.endsWith('-budget');
-  });
-  return clone;
-}
-
-function readPsiAssets() {
-  const reportTemplate = fs.readFileSync(__dirname + '/../../report/assets/faux-psi-template.html', 'utf8');
-  const reportJs = `
-${fs.readFileSync(__dirname + '/../../dist/report/psi.js', 'utf8')};
-${fs.readFileSync(__dirname + '/../../report/clients/faux-psi.js', 'utf8')};
-  `;
-  return [reportTemplate, reportJs];
 }
 
 /**

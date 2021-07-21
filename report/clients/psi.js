@@ -36,12 +36,7 @@ import {Util} from '../renderer/util.js';
  *
  * @param {LH.Result | string} LHResult The stringified version of {LH.Result}
  * @param {Document} document The host page's window.document
- * @return {{
- * scoreGaugeEl: Element,
- * perfCategoryEl: Element,
- * finalScreenshotDataUri: string|null,
- * scoreScaleEl: Element,
- * installFeatures: Function}}
+ * @return {{scoreGaugeEl: Element, perfCategoryEl: Element, finalScreenshotDataUri: string|null, scoreScaleEl: Element, installFeatures: Function}}
  */
 export function prepareLabData(LHResult, document) {
   const lhResult = (typeof LHResult === 'string') ?
@@ -98,12 +93,8 @@ export function prepareLabData(LHResult, document) {
   /** @param {HTMLElement} reportEl */
   const installFeatures = (reportEl) => {
     if (fullPageScreenshot) {
-      // 1) Add fpss css var to reportEl parent so any thumbnails will work
       ElementScreenshotRenderer.installFullPageScreenshot(
         reportEl, fullPageScreenshot.screenshot);
-
-
-      // 2) Set up overlay DOM that must z-index overlap everything important
 
       // Append the overlay element to a specific part of the DOM so that
       // the sticky tab group element renders correctly. If put in the reportEl
