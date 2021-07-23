@@ -6,13 +6,13 @@
 
 declare global {
   module LH.Renderer {
-    export function renderFullReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
-    export function renderReportComponents(
+    export function renderReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
+    export function renderReportPartials(
       lhr: LH.Result,
       options?: ReportRendererOptions
-    ): ReportComponents;
+    ): ReportPartials;
 
-    export function getFinalScreenshot(): void | string;
+    export function getFinalScreenshotDataURL(): void | string;
 
     // Render gauge for a category
     // category handles a bunch of plugin, n/a, and error cases. groupDefinitions only needed for PWA
@@ -26,7 +26,7 @@ declare global {
   }
 
   // TODO(paulirish): Refactor DOM to match. https://github.com/GoogleChrome/lighthouse/issues/12254#issuecomment-877520562
-  type ReportComponents = {
+  type ReportPartials = {
     topbarEl: HTMLElement;
     mainEl: HTMLElement;
     headerEl: HTMLElement;
@@ -35,7 +35,8 @@ declare global {
   };
 
   interface ReportRendererOptions {
-    /** DOM element that will the overlay DOM should be a child of.
+    /**
+     * DOM element that will the overlay DOM should be a child of.
      * Between stacking contexts and z-index, the overlayParentEl should have a stacking/paint order high enough to cover all elements that the overlay should paint above.
      * Defaults to the containerEl, but will be set in PSI to avoid being under the sticky header.
      * @see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
@@ -44,7 +45,8 @@ declare global {
     /** Callback running after a DOM element (like .lh-node or .lh-source-location) has been created */
     onDetailsItemRendered?: (type: string, el: HTMLElement, value: any) => void;
 
-    /** Don't automatically apply dark-mode to dark based on (prefers-color-scheme: dark). (DevTools and PSINext don't want this.)
+    /**
+     * Don't automatically apply dark-mode to dark based on (prefers-color-scheme: dark). (DevTools and PSI don't want this.)
      * Also, the fireworks easter-egg will want to flip to dark, so this setting will also disable chance of fireworks. */
     disableAutoDarkModeAndFireworks?: boolean;
 
