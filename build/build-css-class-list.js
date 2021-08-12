@@ -11,17 +11,12 @@ const CssSelectorParser = require('css-selector-parser').CssSelectorParser;
 const jsdom = require('jsdom');
 const {LH_ROOT} = require('../root.js');
 
-
-/** @typedef  RuleModule */
-
-
-const foundSelectors = [];
-
+// Read report CSS from a sample-report and also from templates.html (as JSDOM won't execute the JS that'd inject their styles)
 const sampleStandaloneHtml = fs.readFileSync(`${LH_ROOT}/dist/now/english/index.html`, 'utf-8');
 const templatesHtml = fs.readFileSync(`${LH_ROOT}/report/assets/templates.html`, 'utf-8');
 
 /**
- *
+ * First step, extract selectors from stylesheets
  * @param {string} html
  */
 function getSelectorsFromStyleSheets(html) {
@@ -29,43 +24,63 @@ function getSelectorsFromStyleSheets(html) {
 
   // unwrap any <template> tags
   Array.from(window.document.querySelectorAll('template')).forEach(templateElem => {
-    console.log(templateElem.id);
     window.document.body.append(templateElem.content.cloneNode(true));
   });
 
-  const selectors =
-      Array.from(window.document.styleSheets)
-        .flatMap(sheet => Array.from(sheet.cssRules || []))
-        .map(rule => /** @type {CSSStyleRule} */ (rule).selectorText)
-        .filter(Boolean);
-  console.log({selectors});
+  const selectors = Array.from(window.document.styleSheets)
+    .flatMap(sheet => Array.from(sheet.cssRules || []))
+    .map(rule => /** @type {CSSStyleRule} */ (rule).selectorText)
+    .filter(Boolean);
   return selectors;
 }
-
+const foundSelectors = [];
 foundSelectors.push(...getSelectorsFromStyleSheets(sampleStandaloneHtml));
 foundSelectors.push(...getSelectorsFromStyleSheets(templatesHtml));
+const uniqSelectors = Array.from(new Set(foundSelectors));
 
-const uniqSelectors = Array.from(
-  new Set(foundSelectors));
+// Shout out to alecxe for the pattern. https://stackoverflow.com/a/38422908/89484
+const selectorParser = new CssSelectorParser();
+selectorParser.registerSelectorPseudos('has', 'contains', 'not', 'is');
+selectorParser.registerNestingOperators('>', '+', '~');
+selectorParser.registerAttrEqualityMods('^', '$', '*', '~');
+selectorParser.enableSubstitutes();
 
-const parser = new CssSelectorParser();
-parser.registerSelectorPseudos('has', 'contains', 'not');
-parser.registerNestingOperators('>', '+', '~');
-parser.registerAttrEqualityMods('^', '$', '*', '~');
-parser.enableSubstitutes();
-
-
-// Shout out to alecxe. https://stackoverflow.com/a/38422908/89484
 /**
- * @param {import('css-selector-parser').Rule} rule
+ * Second step, extract classNames from selectors
+ * @param {string} selector
  * @returns
  */
-function extractRuleClassNames(rule) {
-  if (JSON.stringify(rule).includes('lh-chevron__line-left')) {
-    console.trace();
-    console.log('HIHSIHIH', JSON.stringify(rule, null, 2));
+function parseSelectorIntoClassNames(selector) {
+  const result = selectorParser.parse(selector);
+  /** @type {Array<string>} */
+  const classNamesInSelector = [];
+
+  /**
+   * Recursively walk child rules: With `.foo .bar`, bar will be a child rule
+   * @param {import('css-selector-parser').Rule | undefined} rule
+   */
+  function walkRules(rule) {
+    while (rule) {
+      classNamesInSelector.push(...extractRuleClassNames(rule));
+      rule = rule.rule;
+    }
   }
 
+  if (result.type === 'ruleSet') {
+    walkRules(result.rule);
+  } else if (result.type === 'selectors' && result.selectors) {
+    for (const selector of result.selectors) {
+      walkRules(selector.rule);
+    }
+  }
+  return classNamesInSelector;
+}
+
+/**
+ * @param {import('css-selector-parser').Rule} rule
+ * @return {Array<String>}
+ */
+function extractRuleClassNames(rule) {
   const classNames = [];
   // extract class names defined with ".", e.g. .myclass
   if (rule.classNames) {
@@ -83,46 +98,7 @@ function extractRuleClassNames(rule) {
   return classNames;
 }
 
-/**
- *
- * @param {string} selector
- * @returns
- */
-function processSelector(selector) {
-  const classNamesInSelector = [];
-  const result = parser.parse(selector);
-
-  if (result.type === 'ruleSet') {
-    /** @type {import('css-selector-parser').Rule | undefined} */
-    let rule = result.rule;
-    while (rule) {
-      classNamesInSelector.push(...extractRuleClassNames(rule));
-      rule = rule.rule;
-    }
-  } else if (result.type === 'selectors' && result.selectors) {
-    result.selectors.forEach(function(selector) {
-      /** @type {import('css-selector-parser').Rule | undefined} */
-      let rule = selector.rule;
-      while (rule) {
-        classNamesInSelector.push(...extractRuleClassNames(rule));
-        rule = rule.rule;
-      }
-    });
-  }
-  return classNamesInSelector;
-}
-
-
-// TODO
-// lh-snippet--expanded
-
-
-const allClassNames = [];
-for (const selector of uniqSelectors) {
-  const classNames = processSelector(selector);
-  allClassNames.push(...classNames);
-}
-
+const allClassNames = uniqSelectors.flatMap(parseSelectorIntoClassNames);
 const uniqClassNames = Array.from(new Set(allClassNames)).sort();
 
 const uniqClassNamesTxt = `
@@ -131,6 +107,3 @@ const uniqClassNamesTxt = `
 ${uniqClassNames.join('\n')}
 `;
 fs.writeFileSync(`${LH_ROOT}/dist/report/css_class_list.txt`, uniqClassNamesTxt, 'utf-8');
-console.log('Wrote dist/report/css_class_list.txt');
-
-
