@@ -135,6 +135,7 @@
     "conventional-changelog-cli": "^1.3.4",
     "cpy": "^7.0.1",
     "cross-env": "^7.0.2",
+    "css-selector-parser": "^1.4.1",
     "csv-validator": "^0.0.3",
     "devtools-protocol": "0.0.863986",
     "eslint": "^7.23.0",

@@ -2798,6 +2798,11 @@ csp_evaluator@1.0.4:
   resolved "https://registry.yarnpkg.com/csp_evaluator/-/csp_evaluator-1.0.4.tgz#152deb224683020d55a9dce853266ecab6c56129"
   integrity sha512-hs1lAKCbx/SWXYwpUWu3bS/k1CS10HRLh/7Kjh+VMW2ZZ8GmzymMGlModz+IIgh4gpn+PGuSVoJFkBPU3wGR7Q==
 
+css-selector-parser@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/css-selector-parser/-/css-selector-parser-1.4.1.tgz#03f9cb8a81c3e5ab2c51684557d5aaf6d2569759"
+  integrity sha512-HYPSb7y/Z7BNDCOrakL4raGO2zltZkbeXyAd6Tg9obzix6QhzxCotdBl6VT0Dv4vZfJGVz3WL/xaEI9Ly3ul0g==
+
 cssom@0.3.x, cssom@^0.3.4, cssom@~0.3.6:
   version "0.3.8"
   resolved "https://registry.yarnpkg.com/cssom/-/cssom-0.3.8.tgz#9f1276f5b2b463f2114d3f2c75250af8c1a36f4a"
