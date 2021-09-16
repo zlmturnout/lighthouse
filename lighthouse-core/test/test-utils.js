@@ -167,7 +167,7 @@ function loadSourceMapAndUsageFixture(name) {
  * @return {{devtoolsLog: LH.DevtoolsLog, trace: LH.Trace}}
  */
 function loadTraceFixture(name) {
-  const dir = `${LH_ROOT}/lighthose-core/test/fixtures/traces`;
+  const dir = `${LH_ROOT}/lighthouse-core/test/fixtures/traces`;
   return {
     devtoolsLog: JSON.parse(fs.readFileSync(`${dir}/${name}.devtools.log.json`, 'utf-8')),
     trace: JSON.parse(fs.readFileSync(`${dir}/${name}.json`, 'utf-8')),

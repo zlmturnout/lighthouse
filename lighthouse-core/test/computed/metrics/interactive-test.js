@@ -19,7 +19,7 @@ const {trace, devtoolsLog} = loadTraceFixture('progressive-app-m60');
  * @return {Promise<LH.Artifacts.LanternMetric>}
  */
 async function getResult(data, context) {
-  const result = await getResult(data, context);
+  const result = await Interactive.request(data, context);
   return /** @type {LH.Artifacts.LanternMetric} */ (result);
 }
 
