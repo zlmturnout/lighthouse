@@ -7,10 +7,6 @@
 declare global {
   module LH.Renderer {
     export function renderReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
-    export function renderGaugeForCategory(
-      category: ReportResult.Category,
-      groupDefinitions?: Record<string, LH.Result.ReportGroup>
-    ): HTMLElement;
 
     // Extra convience if you have just a category score.
     export function renderGaugeForScore(num0to1: number): HTMLElement;
