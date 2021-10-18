@@ -7,21 +7,28 @@
 
 const fs = require('fs');
 const browserify = require('browserify');
+const rollupPlugins = require('./rollup-plugins.js');
 const GhPagesApp = require('./gh-pages-app.js');
 const {minifyFileTransform} = require('./build-utils.js');
-const {buildViewerReport} = require('./build-report.js');
-const htmlReportAssets = require('../report/report-assets.js');
 const {LH_ROOT} = require('../root.js');
+
+const localeBasenames = fs.readdirSync(LH_ROOT + '/shared/localization/locales/');
+const actualLocales = localeBasenames
+  .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
+  .map(locale => locale.replace('.json', ''))
+  .sort();
 
 /**
  * Build viewer, optionally deploying to gh-pages if `--deploy` flag was set.
  */
 async function run() {
   // JS bundle from browserified ReportGenerator.
-  const generatorFilename = `${LH_ROOT}/report/report-generator.js`;
+  const generatorFilename = `${LH_ROOT}/report/generator/report-generator.js`;
   const generatorBrowserify = browserify(generatorFilename, {standalone: 'ReportGenerator'})
+    // Flow report is not used in report viewer, so don't include flow assets.
+    .ignore(require.resolve('../report/generator/flow-report-assets.js'))
     .transform('@wardpeet/brfs', {
-      readFileSyncTransform: minifyFileTransform,
+      readFileTransform: minifyFileTransform,
     });
 
   /** @type {Promise<string>} */
@@ -32,28 +39,42 @@ async function run() {
     });
   });
 
-  await buildViewerReport();
-
   const app = new GhPagesApp({
     name: 'viewer',
     appDir: `${LH_ROOT}/lighthouse-viewer/app`,
     html: {path: 'index.html'},
-    htmlReplacements: {
-      '%%LIGHTHOUSE_TEMPLATES%%': htmlReportAssets.REPORT_TEMPLATES,
-    },
     stylesheets: [
-      htmlReportAssets.REPORT_CSS,
       {path: 'styles/*'},
     ],
     javascripts: [
       await generatorJsPromise,
-      fs.readFileSync(require.resolve('idb-keyval/dist/idb-keyval-min.js'), 'utf8'),
-      {path: '../../dist/report/viewer.js'},
-      {path: 'src/*'},
+      {path: require.resolve('pako/dist/pako_inflate.js')},
+      {path: 'src/main.js', rollup: true, rollupPlugins: [
+        rollupPlugins.replace({
+          // Default delimiters are word boundraries. Setting them to nothing (empty strings)
+          // makes this plugin replace any subtring found.
+          delimiters: ['', ''],
+          values: {
+            '[\'__availableLocales__\']': JSON.stringify(actualLocales),
+          },
+        }),
+        rollupPlugins.replace({
+          values: {
+            '__dirname': '""',
+          },
+        }),
+        rollupPlugins.shim({
+          './locales.js': 'export default {}',
+        }),
+        rollupPlugins.commonjs(),
+        rollupPlugins.nodePolyfills(),
+        rollupPlugins.nodeResolve({preferBuiltins: true}),
+      ]},
     ],
     assets: [
-      {path: 'images/**/*'},
+      {path: 'images/**/*', destDir: 'images'},
       {path: 'manifest.json'},
+      {path: '../../shared/localization/locales/*.json', destDir: 'locales'},
     ],
   });
 

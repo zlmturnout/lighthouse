@@ -10,7 +10,7 @@
 import {strict as assert} from 'assert';
 
 import jsdom from 'jsdom';
-import reportAssets from '../../report-assets.js';
+
 import {Util} from '../../renderer/util.js';
 import URL from '../../../lighthouse-core/lib/url-shim.js';
 import {DOM} from '../../renderer/dom.js';
@@ -33,7 +33,7 @@ describe('ReportRenderer', () => {
       };
     };
 
-    const {window} = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATES);
+    const {window} = new jsdom.JSDOM();
     global.self = window;
 
     const dom = new DOM(window.document);
@@ -193,15 +193,6 @@ describe('ReportRenderer', () => {
     });
   });
 
-  it('can set a custom templateContext', () => {
-    assert.equal(renderer._templateContext, renderer._dom.document());
-
-    const {window} = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATES);
-    const otherDocument = window.document;
-    renderer.setTemplateContext(otherDocument);
-    assert.equal(renderer._templateContext, otherDocument);
-  });
-
   it('should add LHR channel to doc link parameters', () => {
     const lhrChannel = sampleResults.configSettings.channel;
     // Make sure we have a channel in the LHR.
@@ -241,60 +232,5 @@ describe('ReportRenderer', () => {
     const notApplicableElementCount = reportElement
       .querySelectorAll('.lh-audit--notapplicable').length;
     assert.strictEqual(notApplicableCount, notApplicableElementCount);
-  });
-
-  describe('axe-core', () => {
-    let axe;
-
-    beforeAll(async () =>{
-      // Needed by axe-core
-      // https://github.com/dequelabs/axe-core/blob/581c441c/doc/examples/jsdom/test/a11y.js#L24
-      global.window = global.self;
-      global.Node = global.self.Node;
-      global.Element = global.self.Element;
-
-      // axe-core must be imported after the global polyfills
-      axe = (await import('axe-core')).default;
-    });
-
-    afterAll(() => {
-      global.window = undefined;
-      global.Node = undefined;
-      global.Element = undefined;
-    });
-
-    it('renders without axe violations', () => {
-      const container = renderer._dom._document.createElement('main');
-      const output = renderer.renderReport(sampleResults, container);
-      renderer._dom._document.body.appendChild(container);
-
-      const config = {
-        rules: {
-          // Reports may have duplicate ids
-          // https://github.com/GoogleChrome/lighthouse/issues/9432
-          'duplicate-id': {enabled: false},
-          'duplicate-id-aria': {enabled: false},
-          'landmark-no-duplicate-contentinfo': {enabled: false},
-          // The following rules are disable for axe-core + jsdom compatibility
-          // https://github.com/dequelabs/axe-core/tree/b573b1c1/doc/examples/jest_react#to-run-the-example
-          'color-contrast': {enabled: false},
-          'link-in-text-block': {enabled: false},
-          // Report has empty links prior to i18n-ing.
-          'link-name': {enabled: false},
-          // May not be a real issue. https://github.com/dequelabs/axe-core/issues/2958
-          'nested-interactive': {enabled: false},
-        },
-      };
-
-      return new Promise(resolve => {
-        axe.run(output, config, (error, {violations}) => {
-          expect(error).toBeNull();
-          expect(violations).toEqual([]);
-          resolve();
-        });
-      });
-    // This test takes 40s on fast hardware, and 50-60s on GHA.
-    // https://github.com/dequelabs/axe-core/tree/b573b1c1/doc/examples/jest_react#timeout-issues
-    }, /* timeout= */ 100 * 1000);
   });
 });

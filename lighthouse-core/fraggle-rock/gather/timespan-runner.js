@@ -12,6 +12,7 @@ const {
   collectPhaseArtifacts,
   awaitArtifacts,
 } = require('./runner-helpers.js');
+const {prepareTargetForTimespanMode} = require('../../gather/driver/prepare.js');
 const {initializeConfig} = require('../config/config.js');
 const {getBaseArtifacts, finalizeArtifacts} = require('./base-artifacts.js');
 
@@ -29,17 +30,20 @@ async function startTimespan(options) {
   const computedCache = new Map();
   const artifactDefinitions = config.artifacts || [];
   const requestedUrl = await options.page.url();
+  const baseArtifacts = await getBaseArtifacts(config, driver, {gatherMode: 'timespan'});
   const artifactState = getEmptyArtifactState();
   /** @type {Omit<import('./runner-helpers.js').CollectPhaseArtifactOptions, 'phase'>} */
   const phaseOptions = {
     driver,
     artifactDefinitions,
     artifactState,
+    baseArtifacts,
     computedCache,
     gatherMode: 'timespan',
     settings: config.settings,
   };
 
+  await prepareTargetForTimespanMode(driver, config.settings);
   await collectPhaseArtifacts({phase: 'startInstrumentation', ...phaseOptions});
   await collectPhaseArtifacts({phase: 'startSensitiveInstrumentation', ...phaseOptions});
 
@@ -48,13 +52,13 @@ async function startTimespan(options) {
       const finalUrl = await options.page.url();
       return Runner.run(
         async () => {
-          const baseArtifacts = await getBaseArtifacts(config, driver);
           baseArtifacts.URL.requestedUrl = requestedUrl;
           baseArtifacts.URL.finalUrl = finalUrl;
 
           await collectPhaseArtifacts({phase: 'stopSensitiveInstrumentation', ...phaseOptions});
           await collectPhaseArtifacts({phase: 'stopInstrumentation', ...phaseOptions});
           await collectPhaseArtifacts({phase: 'getArtifact', ...phaseOptions});
+          await driver.disconnect();
 
           const artifacts = await awaitArtifacts(artifactState);
           return finalizeArtifacts(baseArtifacts, artifacts);

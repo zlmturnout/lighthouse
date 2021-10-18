@@ -6,18 +6,46 @@
 'use strict';
 
 const rollup = require('rollup');
-const {terser} = require('rollup-plugin-terser');
-// Only needed b/c getFilenamePrefix loads a commonjs module.
-const commonjs =
-  // @ts-expect-error types are wrong.
-  /** @type {import('rollup-plugin-commonjs').default} */ (require('rollup-plugin-commonjs'));
+const rollupPlugins = require('./rollup-plugins.js');
+const fs = require('fs');
+const {LH_ROOT} = require('../root.js');
+const {getIcuMessageIdParts} = require('../shared/localization/format.js');
+
+/**
+ * Extract only the strings needed for the flow report into
+ * a script that sets a global variable `strings`, whose keys
+ * are locale codes (en-US, es, etc.) and values are localized UIStrings.
+ */
+function buildFlowStrings() {
+  const locales = require('../shared/localization/locales.js');
+  // TODO(esmodules): use dynamic import when build/ is esm.
+  const i18nCode = fs.readFileSync(`${LH_ROOT}/flow-report/src/i18n/ui-strings.js`, 'utf-8');
+  const UIStrings = eval(i18nCode.replace(/export /g, '') + '\nmodule.exports = UIStrings;');
+  const strings = /** @type {Record<LH.Locale, string>} */ ({});
+
+  for (const [locale, lhlMessages] of Object.entries(locales)) {
+    const localizedStrings = Object.fromEntries(
+      Object.entries(lhlMessages).map(([icuMessageId, v]) => {
+        const {filename, key} = getIcuMessageIdParts(icuMessageId);
+        if (!filename.endsWith('ui-strings.js') || !(key in UIStrings)) {
+          return [];
+        }
+
+        return [key, v.message];
+      })
+    );
+    strings[/** @type {LH.Locale} */ (locale)] = localizedStrings;
+  }
+
+  return 'export default ' + JSON.stringify(strings, null, 2) + ';';
+}
 
 async function buildStandaloneReport() {
   const bundle = await rollup.rollup({
     input: 'report/clients/standalone.js',
     plugins: [
-      commonjs(),
-      terser(),
+      rollupPlugins.commonjs(),
+      rollupPlugins.terser(),
     ],
   });
 
@@ -27,11 +55,44 @@ async function buildStandaloneReport() {
   });
 }
 
+async function buildFlowReport() {
+  const bundle = await rollup.rollup({
+    input: 'flow-report/standalone-flow.tsx',
+    plugins: [
+      rollupPlugins.replace({
+        '__dirname': '""',
+      }),
+      rollupPlugins.shim({
+        [`${LH_ROOT}/flow-report/src/i18n/localized-strings`]: buildFlowStrings(),
+        [`${LH_ROOT}/shared/localization/locales.js`]: 'export default {}',
+        'fs': 'export default {}',
+      }),
+      rollupPlugins.nodeResolve(),
+      rollupPlugins.commonjs(),
+      rollupPlugins.typescript({
+        tsconfig: 'flow-report/tsconfig.json',
+        // Plugin struggles with custom outDir, so revert it from tsconfig value
+        // as well as any options that require an outDir is set.
+        outDir: null,
+        composite: false,
+        emitDeclarationOnly: false,
+        declarationMap: false,
+      }),
+      rollupPlugins.terser(),
+    ],
+  });
+
+  await bundle.write({
+    file: 'dist/report/flow.js',
+    format: 'iife',
+  });
+}
+
 async function buildPsiReport() {
   const bundle = await rollup.rollup({
     input: 'report/clients/psi.js',
     plugins: [
-      commonjs(),
+      rollupPlugins.commonjs(),
     ],
   });
 
@@ -41,60 +102,64 @@ async function buildPsiReport() {
   });
 }
 
-async function buildViewerReport() {
-  const bundle = await rollup.rollup({
-    input: 'report/clients/viewer.js',
-    plugins: [
-      commonjs(),
-    ],
-  });
-
-  await bundle.write({
-    file: 'dist/report/viewer.js',
-    format: 'iife',
-  });
-}
-
-async function buildTreemapReport() {
-  const bundle = await rollup.rollup({
-    input: 'report/clients/treemap.js',
-    plugins: [
-      commonjs(),
-    ],
-  });
-
-  await bundle.write({
-    file: 'dist/report/treemap.js',
-    format: 'iife',
-  });
-}
-
 async function buildEsModulesBundle() {
   const bundle = await rollup.rollup({
     input: 'report/clients/bundle.js',
     plugins: [
-      commonjs(),
+      rollupPlugins.commonjs(),
     ],
   });
 
   await bundle.write({
-    file: 'dist/report/bundle.js',
+    file: 'dist/report/bundle.esm.js',
     format: 'esm',
   });
 }
 
+async function buildUmdBundle() {
+  const bundle = await rollup.rollup({
+    input: 'report/clients/bundle.js',
+    plugins: [
+      rollupPlugins.commonjs(),
+    ],
+  });
+
+  await bundle.write({
+    file: 'dist/report/bundle.umd.js',
+    format: 'umd',
+    name: 'report',
+  });
+}
+
 if (require.main === module) {
-  if (process.argv[2] === '--only-standalone') {
+  if (process.argv.length <= 2) {
     buildStandaloneReport();
-  } else {
-    buildStandaloneReport();
+    buildFlowReport();
     buildEsModulesBundle();
+    buildPsiReport();
+    buildUmdBundle();
+  }
+
+  if (process.argv.includes('--psi')) {
+    buildPsiReport();
+  }
+  if (process.argv.includes('--standalone')) {
+    buildStandaloneReport();
+  }
+  if (process.argv.includes('--flow')) {
+    buildFlowReport();
+  }
+  if (process.argv.includes('--esm')) {
+    buildEsModulesBundle();
+  }
+  if (process.argv.includes('--umd')) {
+    buildUmdBundle();
   }
 }
 
 module.exports = {
   buildStandaloneReport,
+  buildFlowReport,
   buildPsiReport,
-  buildViewerReport,
-  buildTreemapReport,
+  buildUmdBundle,
 };

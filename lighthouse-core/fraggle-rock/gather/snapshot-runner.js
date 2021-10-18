@@ -28,7 +28,7 @@ async function snapshot(options) {
 
   return Runner.run(
     async () => {
-      const baseArtifacts = await getBaseArtifacts(config, driver);
+      const baseArtifacts = await getBaseArtifacts(config, driver, {gatherMode: 'snapshot'});
       baseArtifacts.URL.requestedUrl = url;
       baseArtifacts.URL.finalUrl = url;
 
@@ -38,11 +38,14 @@ async function snapshot(options) {
         phase: 'getArtifact',
         gatherMode: 'snapshot',
         driver,
+        baseArtifacts,
         artifactDefinitions,
         artifactState,
         computedCache,
         settings: config.settings,
       });
+
+      await driver.disconnect();
 
       const artifacts = await awaitArtifacts(artifactState);
       return finalizeArtifacts(baseArtifacts, artifacts);

@@ -8,8 +8,10 @@
 /* eslint-env jest */
 
 import {strict as assert} from 'assert';
+
 import jsdom from 'jsdom';
-import reportAssets from '../../report-assets.js';
+
+import reportAssets from '../../generator/report-assets.js';
 import {Util} from '../../renderer/util.js';
 import {DOM} from '../../renderer/dom.js';
 import {DetailsRenderer} from '../../renderer/details-renderer.js';
@@ -45,9 +47,7 @@ describe('ReportUIFeatures', () => {
       };
     };
 
-    const reportWithTemplates = reportAssets.REPORT_TEMPLATE
-      .replace('%%LIGHTHOUSE_TEMPLATES%%', reportAssets.REPORT_TEMPLATES);
-    const document = new jsdom.JSDOM(reportWithTemplates);
+    const document = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATE);
     global.self = document.window;
     global.self.matchMedia = function() {
       return {
@@ -158,16 +158,6 @@ describe('ReportUIFeatures', () => {
               ],
             },
           },
-        ];
-        // Sample json currently doesn't have any results for `unused-javascript`, so
-        // headings is empty. Can delete this block of code if that changes.
-        expect(lhr.audits['unused-javascript'].details.headings).toHaveLength(0);
-        lhr.audits['unused-javascript'].details.headings = [
-          /* t-disable max-len */
-          {key: 'url', valueType: 'url', subItemsHeading: {key: 'source', valueType: 'code'}},
-          {key: 'totalBytes', valueType: 'bytes', subItemsHeading: {key: 'sourceBytes'}},
-          {key: 'wastedBytes', valueType: 'bytes', subItemsHeading: {key: 'sourceWastedBytes'}},
-          /* eslint-enable max-len */
         ];
 
         // Only third party URLs to test that checkbox is hidden
@@ -286,7 +276,7 @@ describe('ReportUIFeatures', () => {
       const lhr = JSON.parse(JSON.stringify(sampleResults));
       lhr.categories.performance.score = 0.5;
       const container = render(lhr);
-      assert.ok(container.querySelector('.score100') === null, 'has no fireworks treatment');
+      assert.ok(container.querySelector('.lh-score100') === null, 'has no fireworks treatment');
     });
 
     it('should render an all 100 report with fireworks', () => {
@@ -295,7 +285,7 @@ describe('ReportUIFeatures', () => {
         element.score = 1;
       });
       const container = render(lhr);
-      assert.ok(container.querySelector('.score100'), 'has fireworks treatment');
+      assert.ok(container.querySelector('.lh-score100'), 'has fireworks treatment');
     });
 
     it('should show fireworks for all 100s except PWA', () => {
@@ -306,7 +296,7 @@ describe('ReportUIFeatures', () => {
       lhr.categories.pwa.score = 0;
 
       const container = render(lhr);
-      assert.ok(container.querySelector('.score100'), 'has fireworks treatment');
+      assert.ok(container.querySelector('.lh-score100'), 'has fireworks treatment');
     });
 
     it('should not render fireworks if all core categories are not present', () => {
@@ -317,7 +307,7 @@ describe('ReportUIFeatures', () => {
         element.score = 1;
       });
       const container = render(lhr);
-      assert.ok(container.querySelector('.score100') === null, 'has no fireworks treatment');
+      assert.ok(container.querySelector('.lh-score100') === null, 'has no fireworks treatment');
     });
   });
 
@@ -344,32 +334,32 @@ describe('ReportUIFeatures', () => {
       window = dom.document().defaultView;
       const features = new ReportUIFeatures(dom);
       features.initFeatures(sampleResults);
-      dropDown = features._dropDown;
+      dropDown = features._topbar._dropDownMenu;
     });
 
     it('click should toggle active class', () => {
       dropDown._toggleEl.click();
-      assert.ok(dropDown._toggleEl.classList.contains('active'));
+      assert.ok(dropDown._toggleEl.classList.contains('lh-active'));
 
       dropDown._toggleEl.click();
-      assert.ok(!dropDown._toggleEl.classList.contains('active'));
+      assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
     });
 
 
     it('Escape key removes active class', () => {
       dropDown._toggleEl.click();
-      assert.ok(dropDown._toggleEl.classList.contains('active'));
+      assert.ok(dropDown._toggleEl.classList.contains('lh-active'));
 
       const escape = new window.KeyboardEvent('keydown', {keyCode: /* ESC */ 27});
       dom.document().dispatchEvent(escape);
-      assert.ok(!dropDown._toggleEl.classList.contains('active'));
+      assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
     });
 
     ['ArrowUp', 'ArrowDown', 'Enter', ' '].forEach((code) => {
       it(`'${code}' adds active class`, () => {
         const event = new window.KeyboardEvent('keydown', {code});
         dropDown._toggleEl.dispatchEvent(event);
-        assert.ok(dropDown._toggleEl.classList.contains('active'));
+        assert.ok(dropDown._toggleEl.classList.contains('lh-active'));
       });
     });
 
@@ -481,14 +471,14 @@ describe('ReportUIFeatures', () => {
     describe('onMenuFocusOut', () => {
       beforeEach(() => {
         dropDown._toggleEl.click();
-        assert.ok(dropDown._toggleEl.classList.contains('active'));
+        assert.ok(dropDown._toggleEl.classList.contains('lh-active'));
       });
 
       it('should toggle active class when focus relatedTarget is null', () => {
         const event = new window.FocusEvent('focusout', {relatedTarget: null});
         dropDown.onMenuFocusOut(event);
 
-        assert.ok(!dropDown._toggleEl.classList.contains('active'));
+        assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
       });
 
       it('should toggle active class when focus relatedTarget is document.body', () => {
@@ -496,7 +486,7 @@ describe('ReportUIFeatures', () => {
         const event = new window.FocusEvent('focusout', {relatedTarget});
         dropDown.onMenuFocusOut(event);
 
-        assert.ok(!dropDown._toggleEl.classList.contains('active'));
+        assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
       });
 
       it('should toggle active class when focus relatedTarget is _toggleEl', () => {
@@ -504,7 +494,7 @@ describe('ReportUIFeatures', () => {
         const event = new window.FocusEvent('focusout', {relatedTarget});
         dropDown.onMenuFocusOut(event);
 
-        assert.ok(!dropDown._toggleEl.classList.contains('active'));
+        assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
       });
 
       it('should not toggle active class when focus relatedTarget is a menu item', () => {
@@ -512,7 +502,7 @@ describe('ReportUIFeatures', () => {
         const event = new window.FocusEvent('focusout', {relatedTarget});
         dropDown.onMenuFocusOut(event);
 
-        assert.ok(dropDown._toggleEl.classList.contains('active'));
+        assert.ok(dropDown._toggleEl.classList.contains('lh-active'));
       });
     });
   });
@@ -522,10 +512,10 @@ describe('ReportUIFeatures', () => {
       const lhr = JSON.parse(JSON.stringify(sampleResults));
 
       expect(lhr.audits['script-treemap-data']).not.toBeUndefined();
-      expect(render(lhr).querySelector('.lh-button.report-icon--treemap')).toBeTruthy();
+      expect(render(lhr).querySelector('.lh-button.lh-report-icon--treemap')).toBeTruthy();
 
       delete lhr.audits['script-treemap-data'];
-      expect(render(lhr).querySelector('.lh-button.report-icon--treemap')).toBeNull();
+      expect(render(lhr).querySelector('.lh-button.lh-report-icon--treemap')).toBeNull();
     });
   });
 

@@ -6,18 +6,6 @@
 'use strict';
 
 module.exports = {
-  collectCoverage: false,
-  coverageReporters: ['none'],
-  collectCoverageFrom: [
-    '**/lighthouse-core/**/*.js',
-    '**/lighthouse-cli/**/*.js',
-    '**/report/**/*.js',
-    '**/lighthouse-viewer/**/*.js',
-  ],
-  coveragePathIgnorePatterns: [
-    '/test/',
-    '/scripts/',
-  ],
   setupFilesAfterEnv: ['./lighthouse-core/test/test-utils.js'],
   testEnvironment: 'node',
   testMatch: [
@@ -26,13 +14,15 @@ module.exports = {
     '**/report/**/*-test.js',
     '**/lighthouse-core/test/fraggle-rock/**/*-test-pptr.js',
     '**/lighthouse-treemap/**/*-test.js',
-    '**/lighthouse-treemap/**/*-test-pptr.js',
     '**/lighthouse-viewer/**/*-test.js',
-    '**/lighthouse-viewer/**/*-test-pptr.js',
     '**/third-party/**/*-test.js',
     '**/clients/test/**/*-test.js',
-    '**/docs/**/*.test.js',
+    '**/shared/**/*-test.js',
   ],
   transform: {},
   prettierPath: null,
+  projects: [
+    '<rootDir>',
+    '<rootDir>/flow-report',
+  ],
 };

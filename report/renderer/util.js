@@ -167,6 +167,8 @@ export class Util {
 
   /**
    * Convert a score to a rating label.
+   * TODO: Return `'error'` for `score === null && !scoreDisplayMode`.
+   *
    * @param {number|null} score
    * @param {string=} scoreDisplayMode
    * @return {string}
@@ -388,7 +390,7 @@ export class Util {
   }
 
   /**
-   * @param {LH.Config.Settings} settings
+   * @param {LH.Result['configSettings']} settings
    * @return {!Array<{name: string, description: string}>}
    */
   static getEnvironmentDisplayValues(settings) {
@@ -411,7 +413,7 @@ export class Util {
   }
 
   /**
-   * @param {LH.Config.Settings} settings
+   * @param {LH.Result['configSettings']} settings
    * @return {{deviceEmulation: string, networkThrottling: string, cpuThrottling: string}}
    */
   static getEmulationDescriptions(settings) {
@@ -505,6 +507,44 @@ export class Util {
    */
   static isPluginCategory(categoryId) {
     return categoryId.startsWith('lighthouse-plugin-');
+  }
+
+  /**
+   * @param {LH.Result.GatherMode} gatherMode
+   */
+  static shouldDisplayAsFraction(gatherMode) {
+    return gatherMode === 'timespan' || gatherMode === 'snapshot';
+  }
+
+  /**
+   * @param {LH.ReportResult.Category} category
+   */
+  static calculateCategoryFraction(category) {
+    let numPassableAudits = 0;
+    let numPassed = 0;
+    let numInformative = 0;
+    let totalWeight = 0;
+    for (const auditRef of category.auditRefs) {
+      const auditPassed = Util.showAsPassed(auditRef.result);
+      const notDisplayed = !auditRef.group && category.id === 'performance';
+
+      // Don't count the audit if it's manual, N/A, or isn't displayed.
+      if (notDisplayed ||
+          auditRef.result.scoreDisplayMode === 'manual' ||
+          auditRef.result.scoreDisplayMode === 'notApplicable') {
+        continue;
+      } else if (auditRef.result.scoreDisplayMode === 'informative') {
+        if (!auditPassed) {
+          ++numInformative;
+        }
+        continue;
+      }
+
+      ++numPassableAudits;
+      totalWeight += auditRef.weight;
+      if (auditPassed) numPassed++;
+    }
+    return {numPassed, numPassableAudits, numInformative, totalWeight};
   }
 }
 

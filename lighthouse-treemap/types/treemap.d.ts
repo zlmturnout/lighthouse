@@ -1,14 +1,22 @@
-import _TreemapUtil = require('../app/src/util.js');
-import _DragAndDrop = require('../../lighthouse-viewer/app/src/drag-and-drop.js');
-import _FirebaseAuth = require('../../lighthouse-viewer/app/src/firebase-auth.js');
-import _GithubApi = require('../../lighthouse-viewer/app/src/github-api.js');
-import {TextEncoding as _TextEncoding} from '../../report/renderer/text-encoding.js';
 import {Logger as _Logger} from '../../report/renderer/logger.js';
-import {I18n as _I18n} from '../../report/renderer/i18n.js';
-import {getFilenamePrefix as _getFilenamePrefix} from '../../report/renderer/file-namer.js';
 import {FirebaseNamespace} from '@firebase/app-types';
+import Treemap_ from '../../types/lhr/treemap';
+import * as Settings from '../../types/lhr/settings';
+import 'google.analytics';
+import LHResult from '../../types/lhr/lhr';
+import {TreemapUtil} from '../app/src/util';
+
+// Import for needed DOM type augmentation.
+import '../../report/types/augment-dom';
 
 declare global {
+  // Expose global types in LH namespace.
+  module LH {
+    export import Treemap = Treemap_;
+    export import Result = LHResult;
+    export import Locale = Settings.Locale;
+  }
+
   class WebTreeMap {
     constructor(data: any, options: WebTreeMapOptions);
     render(el: HTMLElement): void;
@@ -38,26 +46,19 @@ declare global {
     render(el: HTMLElement, data: any, options: WebTreeMapOptions): void;
     sort(data: any): void;
   };
-  var TreemapUtil: typeof _TreemapUtil;
-  var TextEncoding: typeof _TextEncoding;
-  var Logger: typeof _Logger;
-  var DragAndDrop: typeof _DragAndDrop;
-  var GithubApi: typeof _GithubApi;
-  var FirebaseAuth: typeof _FirebaseAuth;
+  var logger: _Logger;
   var firebase: Required<FirebaseNamespace>;
   var idbKeyval: typeof import('idb-keyval');
-  var strings: Record<LH.Locale, import('../../lighthouse-core/lib/i18n/locales').LhlMessages>;
-  var getFilenamePrefix: typeof _getFilenamePrefix;
-  var I18n: typeof _I18n;
+  // `strings` is generated in build/build-treemap.js
+  var strings: Record<Settings.Locale, typeof TreemapUtil['UIStrings']>;
 
   interface Window {
     logger: _Logger;
     __treemapOptions?: LH.Treemap.Options;
+    ga: UniversalAnalytics.ga;
   }
 
   interface AddEventListenerOptions {
     signal?: AbortSignal;
   }
 }
-
-export {};

@@ -47,11 +47,16 @@ cp -pPR "$lh_bg_js" "$fe_lh_dir/lighthouse-dt-bundle.js"
 echo -e "$check lighthouse-dt-bundle copied."
 
 # generate bundle.d.ts
-npx tsc --allowJs --declaration --emitDeclarationOnly dist/report/bundle.js
+npx tsc --allowJs --declaration --emitDeclarationOnly dist/report/bundle.esm.js
+# Exports of report/clients/bundle.js can possibly be mistakenly overriden by tsc.
+sed -i '' 's/export type DOM = any;//' dist/report/bundle.esm.d.ts
+sed -i '' 's/export type ReportRenderer = any;//' dist/report/bundle.esm.d.ts
+sed -i '' 's/export type ReportUIFeatures = any;//' dist/report/bundle.esm.d.ts
 
 # copy report code $fe_lh_dir
 fe_lh_report_dir="$fe_lh_dir/report/"
-cp dist/report/bundle.js dist/report/bundle.d.ts "$fe_lh_report_dir"
+cp dist/report/bundle.esm.js "$fe_lh_report_dir/bundle.js"
+cp dist/report/bundle.esm.d.ts "$fe_lh_report_dir/bundle.d.ts"
 echo -e "$check Report code copied."
 
 # copy report generator + cached resources into $fe_lh_dir
@@ -60,7 +65,7 @@ rsync -avh dist/dt-report-resources/ "$fe_lh_report_assets_dir" --delete
 echo -e "$check Report resources copied."
 
 # copy locale JSON files (but not the .ctc.json ones)
-lh_locales_dir="lighthouse-core/lib/i18n/locales/"
+lh_locales_dir="shared/localization/locales/"
 fe_locales_dir="$fe_lh_dir/locales"
 rsync -avh "$lh_locales_dir" "$fe_locales_dir" --exclude="*.ctc.json" --delete
 echo -e "$check Locale JSON files copied."
@@ -71,5 +76,5 @@ fe_webtests_dir="$dt_dir/test/webtests/http/tests/devtools/lighthouse"
 rsync -avh "$lh_webtests_dir" "$fe_webtests_dir" --exclude="OWNERS" --delete
 
 echo ""
-echo "Done. To run the webtests: " 
+echo "Done. To run the webtests: "
 echo "    DEVTOOLS_PATH=\"$dt_dir\" yarn test-devtools"

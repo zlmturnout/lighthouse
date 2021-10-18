@@ -8,6 +8,13 @@
   box-sizing: border-box;
 }
 
+body {
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 24px;
+  margin: 0;
+}
+
 :root {
   --lh-background-color: #304ffe;
 }
@@ -48,7 +55,6 @@
   align-items: center;
   justify-content: center;
   color: #555;
-  font-weight: 300;
 }
 .viewer-placeholder-inner {
   display: flex;

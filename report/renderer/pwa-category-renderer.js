@@ -27,7 +27,7 @@ export class PwaCategoryRenderer extends CategoryRenderer {
    */
   render(category, groupDefinitions = {}) {
     const categoryElem = this.dom.createElement('div', 'lh-category');
-    this.createPermalinkSpan(categoryElem, category.id);
+    categoryElem.id = category.id;
     categoryElem.appendChild(this.renderCategoryHeader(category, groupDefinitions));
 
     const auditRefs = category.auditRefs;
@@ -48,19 +48,28 @@ export class PwaCategoryRenderer extends CategoryRenderer {
   }
 
   /**
+   * Alias for backcompat.
    * @param {LH.ReportResult.Category} category
    * @param {Record<string, LH.Result.ReportGroup>} groupDefinitions
    * @return {DocumentFragment}
    */
   renderScoreGauge(category, groupDefinitions) {
+    return this.renderCategoryScore(category, groupDefinitions);
+  }
+
+  /**
+   * @param {LH.ReportResult.Category} category
+   * @param {Record<string, LH.Result.ReportGroup>} groupDefinitions
+   * @return {DocumentFragment}
+   */
+  renderCategoryScore(category, groupDefinitions) {
     // Defer to parent-gauge style if category error.
     if (category.score === null) {
       return super.renderScoreGauge(category, groupDefinitions);
     }
 
-    const tmpl = this.dom.cloneTemplate('#tmpl-lh-gauge--pwa', this.templateContext);
+    const tmpl = this.dom.createComponent('gaugePwa');
     const wrapper = this.dom.find('a.lh-gauge--pwa__wrapper', tmpl);
-    wrapper.href = `#${category.id}`;
 
     // Correct IDs in case multiple instances end up in the page.
     const svgRoot = tmpl.querySelector('svg');

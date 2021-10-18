@@ -7,19 +7,21 @@
 
 /* eslint-env jest */
 
-const path = require('path');
-const fs = require('fs');
-const assert = require('assert').strict;
-const puppeteer = require('puppeteer');
-const {server} = require('../../lighthouse-cli/test/fixtures/static-server.js');
-const {LH_ROOT} = require('../../root.js');
+import fs from 'fs';
+import assert from 'assert';
+
+import {jest} from '@jest/globals';
+import puppeteer from 'puppeteer';
+
+import {server} from '../../lighthouse-cli/test/fixtures/static-server.js';
+import defaultConfig from '../../lighthouse-core/config/default-config.js';
+import {LH_ROOT} from '../../root.js';
+import {getCanonicalLocales} from '../../shared/localization/format.js';
 
 const portNumber = 10200;
 const viewerUrl = `http://localhost:${portNumber}/dist/gh-pages/viewer/index.html`;
 const sampleLhr = LH_ROOT + '/lighthouse-core/test/results/sample_v2.json';
 
-const defaultConfig =
-  require(path.resolve(LH_ROOT, './lighthouse-core/config/default-config.js'));
 const lighthouseCategories = Object.keys(defaultConfig.categories);
 const getAuditsOfCategory = category => defaultConfig.categories[category].auditRefs;
 
@@ -55,11 +57,7 @@ describe('Lighthouse Viewer', () => {
   function getCategoryElementsIds() {
     return viewerPage.evaluate(
       () => {
-        const elems = Array.from(document.querySelectorAll(`.lh-category`));
-        return elems.map(el => {
-          const permalink = el.querySelector('.lh-permalink');
-          return permalink && permalink.id;
-        });
+        return Array.from(document.querySelectorAll(`.lh-category`)).map(el => el.id);
       });
   }
 
@@ -141,10 +139,40 @@ describe('Lighthouse Viewer', () => {
         });
       }
 
-      const errorSelectors = '.lh-audit-explanation, .tooltip--error';
+      const errorSelectors = '.lh-audit-explanation, .lh-tooltip--error';
       const auditErrors = await viewerPage.$$eval(errorSelectors, getErrors, selectors);
       const errors = auditErrors.filter(item => item.explanation.includes('Audit error:'));
       assert.deepStrictEqual(errors, [], 'Audit errors found within the report');
+    });
+
+    it('should support swapping locales', async () => {
+      function queryLocaleState() {
+        return viewerPage.$$eval('.lh-locale-selector', (elems) => {
+          const selectEl = elems[0];
+          const optionEls = [...selectEl.querySelectorAll('option')];
+          return {
+            selectedValue: selectEl.value,
+            options: optionEls.map(el => {
+              return el.value;
+            }),
+            sampleString: document.querySelector('.lh-report-icon--copy').textContent,
+          };
+        });
+      }
+
+      const resultBeforeSwap = await queryLocaleState();
+      expect(resultBeforeSwap.selectedValue).toBe('en-US');
+      expect(resultBeforeSwap.options).toEqual(getCanonicalLocales());
+      expect(resultBeforeSwap.sampleString).toBe('Copy JSON');
+
+      await viewerPage.select('.lh-locale-selector', 'es');
+      await viewerPage.waitForFunction(() => {
+        return document.querySelector('.lh-report-icon--copy').textContent === 'Copiar JSON';
+      });
+
+      const resultAfterSwap = await queryLocaleState();
+      expect(resultAfterSwap.selectedValue).toBe('es');
+      expect(resultAfterSwap.sampleString).toBe('Copiar JSON');
     });
   });
 
@@ -302,7 +330,7 @@ describe('Lighthouse Viewer', () => {
       await viewerPage.goto(url);
 
       // Wait for error.
-      const errorEl = await viewerPage.waitForSelector('#lh-log.show');
+      const errorEl = await viewerPage.waitForSelector('#lh-log.lh-show');
       const errorMessage = await viewerPage.evaluate(errorEl => errorEl.textContent, errorEl);
       expect(errorMessage).toBe('Test error');
 

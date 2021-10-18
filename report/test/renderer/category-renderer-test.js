@@ -5,12 +5,12 @@
  */
 'use strict';
 
-/* eslint-env jest, browser */
+/* eslint-env jest */
 
 import {strict as assert} from 'assert';
 
 import jsdom from 'jsdom';
-import reportAssets from '../../report-assets.js';
+
 import {Util} from '../../renderer/util.js';
 import {I18n} from '../../renderer/i18n.js';
 import {DOM} from '../../renderer/dom.js';
@@ -25,7 +25,7 @@ describe('CategoryRenderer', () => {
   beforeAll(() => {
     Util.i18n = new I18n('en', {...Util.UIStrings});
 
-    const {document} = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATES).window;
+    const {document} = new jsdom.JSDOM().window;
     const dom = new DOM(document);
     const detailsRenderer = new DetailsRenderer(dom);
     renderer = new CategoryRenderer(dom, detailsRenderer);
@@ -256,7 +256,9 @@ describe('CategoryRenderer', () => {
       const categoryDOM = renderer.render(a11yCategory, sampleResults.categoryGroups);
       const percentageEl = categoryDOM.querySelectorAll('.lh-gauge__percentage');
 
-      assert.equal(percentageEl[0].textContent, '81', 'score shows a non-dash value');
+      const scoreText = percentageEl[0].textContent;
+      assert(!scoreText.includes('.'), 'score is integer');
+      assert(Number(scoreText) >= 0 && Number(scoreText) <= 100, 'score is 0-100');
     });
   });
 
@@ -271,7 +273,9 @@ describe('CategoryRenderer', () => {
       const categoryDOM = renderer.render(category, sampleResults.categoryGroups);
 
       const gauge = categoryDOM.querySelector('.lh-gauge__percentage');
-      assert.equal(gauge.textContent.trim(), '81', 'score is 0-100');
+      const scoreText = gauge.textContent.trim();
+      assert(!scoreText.includes('.'), 'score is integer');
+      assert(Number(scoreText) >= 0 && Number(scoreText) <= 100, 'score is 0-100');
 
       const score = categoryDOM.querySelector('.lh-category-header');
       const value = categoryDOM.querySelector('.lh-gauge__percentage');
@@ -281,6 +285,25 @@ describe('CategoryRenderer', () => {
       assert.deepEqual(score, score.firstElementChild, 'first child is a score');
       const scoreInDom = Number(value.textContent);
       assert.ok(Number.isInteger(scoreInDom) && scoreInDom > 10, 'score is rounded out of 100');
+      assert.equal(title.textContent, category.title, 'title is set');
+      assert.ok(description.querySelector('a'), 'description contains converted markdown links');
+    });
+
+    it('renders the category header with fraction', () => {
+      const categoryDOM = renderer.render(
+        category,
+        sampleResults.categoryGroups,
+        {gatherMode: 'snapshot'}
+      );
+
+      const gauge = categoryDOM.querySelector('.lh-fraction__content');
+      assert.equal(gauge.textContent.trim(), '13/18', 'fraction is included');
+
+      const score = categoryDOM.querySelector('.lh-category-header');
+      const title = score.querySelector('.lh-fraction__label');
+      const description = score.querySelector('.lh-category-header__description');
+
+      assert.deepEqual(score, score.firstElementChild, 'first child is a score');
       assert.equal(title.textContent, category.title, 'title is set');
       assert.ok(description.querySelector('a'), 'description contains converted markdown links');
     });
@@ -471,14 +494,5 @@ describe('CategoryRenderer', () => {
       assert.strictEqual(shouldBeWarning[0].id, 'passing');
       assert.ok(shouldBeWarning[0].textContent.includes(passingWarning));
     });
-  });
-
-  it('can set a custom templateContext', () => {
-    assert.equal(renderer.templateContext, renderer.dom.document());
-
-    const dom = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATES);
-    const otherDocument = dom.window.document;
-    renderer.setTemplateContext(otherDocument);
-    assert.equal(renderer.templateContext, otherDocument);
   });
 });
