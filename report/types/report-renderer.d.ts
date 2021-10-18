@@ -7,32 +7,14 @@
 declare global {
   module LH.Renderer {
     export function renderReport(lhr: LH.Result, options?: ReportRendererOptions): HTMLElement;
-    export function renderReportPartials(
-      lhr: LH.Result,
-      options?: ReportRendererOptions
-    ): ReportPartials;
-
-    export function getFinalScreenshotDataURL(): void | string;
-
-    // Render gauge for a category
-    // category handles a bunch of plugin, n/a, and error cases. groupDefinitions only needed for PWA
     export function renderGaugeForCategory(
-      category: LH.ReportCategory,
+      category: ReportResult.Category,
       groupDefinitions?: Record<string, LH.Result.ReportGroup>
     ): HTMLElement;
 
     // Extra convience if you have just a category score.
     export function renderGaugeForScore(num0to1: number): HTMLElement;
   }
-
-  // TODO(paulirish): Refactor DOM to match. https://github.com/GoogleChrome/lighthouse/issues/12254#issuecomment-877520562
-  type ReportPartials = {
-    topbarEl: HTMLElement;
-    mainEl: HTMLElement;
-    headerEl: HTMLElement;
-    categoriesEl: HTMLElement;
-    footerEl: HTMLElement;
-  };
 
   interface ReportRendererOptions {
     /**
@@ -43,12 +25,15 @@ declare global {
     overlayParentEl?: HTMLElement;
 
     /** Callback running after a DOM element (like .lh-node or .lh-source-location) has been created */
-    onDetailsItemRendered?: (type: string, el: HTMLElement, value: any) => void;
+    onDetailsItemRendered?: (type: LH.Audit.Details['type'], el: HTMLElement, value: LH.Audit.Details) => void;
 
     /**
      * Don't automatically apply dark-mode to dark based on (prefers-color-scheme: dark). (DevTools and PSI don't want this.)
      * Also, the fireworks easter-egg will want to flip to dark, so this setting will also disable chance of fireworks. */
     disableAutoDarkModeAndFireworks?: boolean;
+
+    /** Disable the topbar UI component */
+    disableTopBar: boolean;
 
     /** If defined, the 'Save as Gist' item in the topbar dropdown will be shown and when clicked, will run this function. */
     onSaveGist?: (lhr: LH.Result) => string;
