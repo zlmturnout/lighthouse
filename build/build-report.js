@@ -17,6 +17,7 @@ const {getIcuMessageIdParts} = require('../shared/localization/format.js');
  * are locale codes (en-US, es, etc.) and values are localized UIStrings.
  */
 function buildFlowStrings() {
+  console.time('buildFlowStrings');
   const locales = require('../shared/localization/locales.js');
   // TODO(esmodules): use dynamic import when build/ is esm.
   const i18nCode = fs.readFileSync(`${LH_ROOT}/flow-report/src/i18n/ui-strings.js`, 'utf-8');
@@ -37,12 +38,16 @@ function buildFlowStrings() {
     strings[/** @type {LH.Locale} */ (locale)] = localizedStrings;
   }
 
+
+  console.timeEnd('buildFlowStrings');
   return 'export default ' + JSON.stringify(strings, null, 2) + ';';
 }
 
 async function buildStandaloneReport() {
+  console.time('buildStandaloneReport');
   const bundle = await rollup.rollup({
     input: 'report/clients/standalone.js',
+    perf: true,
     plugins: [
       rollupPlugins.commonjs(),
       rollupPlugins.terser(),
@@ -53,11 +58,15 @@ async function buildStandaloneReport() {
     file: 'dist/report/standalone.js',
     format: 'iife',
   });
+  console.log('buildStandaloneReport timings', bundle.getTimings());
+  console.timeEnd('buildStandaloneReport');
 }
 
 async function buildFlowReport() {
+  console.time('buildFlowReport');
   const bundle = await rollup.rollup({
     input: 'flow-report/standalone-flow.tsx',
+    perf: true,
     plugins: [
       rollupPlugins.replace({
         '__dirname': '""',
@@ -86,11 +95,15 @@ async function buildFlowReport() {
     file: 'dist/report/flow.js',
     format: 'iife',
   });
+  console.log('buildFlowReport timings', bundle.getTimings());
+  console.timeEnd('buildFlowReport');
 }
 
 async function buildEsModulesBundle() {
+  console.time('buildEsModulesBundle');
   const bundle = await rollup.rollup({
     input: 'report/clients/bundle.js',
+    perf: true,
     plugins: [
       rollupPlugins.commonjs(),
     ],
@@ -100,11 +113,16 @@ async function buildEsModulesBundle() {
     file: 'dist/report/bundle.esm.js',
     format: 'esm',
   });
+  console.log('esm', bundle.getTimings());
+  console.log('buildEsModulesBundle timings', bundle.getTimings());
+  console.timeEnd('buildEsModulesBundle');
 }
 
 async function buildUmdBundle() {
+  console.time('buildUmdBundle');
   const bundle = await rollup.rollup({
     input: 'report/clients/bundle.js',
+    perf: true,
     plugins: [
       rollupPlugins.commonjs(),
       rollupPlugins.terser({
@@ -120,6 +138,8 @@ async function buildUmdBundle() {
     format: 'umd',
     name: 'report',
   });
+  console.log('buildUmdBundle timings', bundle.getTimings());
+  console.timeEnd('buildUmdBundle');
 }
 
 if (require.main === module) {
