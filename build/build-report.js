@@ -143,17 +143,16 @@ async function buildUmdBundle() {
 }
 
 if (require.main === module) {
+  // Build all 4 in parallel, if there's no argv
   if (process.argv.length <= 2) {
+    // NOTE that these fns are async, however we do NOT await them because we want them building in parallel!
     buildStandaloneReport();
     buildFlowReport();
     buildEsModulesBundle();
     buildUmdBundle();
   }
 
-  if (process.argv.includes('--psi')) {
-    console.error('--psi build removed. use --umd instead.');
-    process.exit(1);
-  }
+
   if (process.argv.includes('--standalone')) {
     buildStandaloneReport();
   }
