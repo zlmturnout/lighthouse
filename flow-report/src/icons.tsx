@@ -79,6 +79,23 @@ export const SnapshotIcon: FunctionComponent = () => {
   );
 };
 
+export const CloseIcon: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24px"
+      viewBox="0 0 24 24"
+      width="24px"
+      fill="currentColor"
+      role="img"
+      aria-label="Icon representing a close action"
+    >
+      <path d="M0 0h24v24H0V0z" fill="none" />
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+    </svg>
+  );
+};
+
 export const EnvIcon: FunctionComponent = () => {
   return (
     <svg width="15" height="12" viewBox="0 0 15 12" fill="none" role="img">
@@ -98,10 +115,17 @@ export const CpuIcon: FunctionComponent = () => {
 export const HamburgerIcon: FunctionComponent = () => {
   return (
     <svg viewBox="0 0 18 12" width="18" height="12" role="img">
-      <rect width="18" height="2"></rect>
-      <rect y="5" width="18" height="2"></rect>
-      <rect y="10" width="18" height="2"></rect>
+      <rect width="18" height="2" fill="currentColor"></rect>
+      <rect y="5" width="18" height="2" fill="currentColor"></rect>
+      <rect y="10" width="18" height="2" fill="currentColor"></rect>
     </svg>
   );
 };
 
+export const InfoIcon: FunctionComponent = () => {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M13 7C13 10.3137 10.3137 13 7 13C3.68629 13 1 10.3137 1 7C1 3.68629 3.68629 1 7 1C10.3137 1 13 3.68629 13 7ZM14 7C14 10.866 10.866 14 7 14C3.13401 14 0 10.866 0 7C0 3.13401 3.13401 0 7 0C10.866 0 14 3.13401 14 7ZM7.66658 11H6.33325V9.66667H7.66658V11ZM4.33325 5.66667C4.33325 4.19333 5.52659 3 6.99992 3C8.47325 3 9.66658 4.19333 9.66658 5.66667C9.66658 6.52194 9.1399 6.98221 8.62709 7.43036C8.1406 7.85551 7.66658 8.26975 7.66658 9H6.33325C6.33325 7.78582 6.96133 7.30439 7.51355 6.88112C7.94674 6.54907 8.33325 6.25281 8.33325 5.66667C8.33325 4.93333 7.73325 4.33333 6.99992 4.33333C6.26658 4.33333 5.66658 4.93333 5.66658 5.66667H4.33325Z" fill="currentColor"/>
+    </svg>
+  );
+};

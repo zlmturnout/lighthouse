@@ -9,7 +9,7 @@
       "axe-core": "4.2.3"
     }
   },
-  "lighthouseVersion": "8.4.0",
+  "lighthouseVersion": "8.6.0",
   "fetchTime": "2021-09-07T20:11:11.853Z",
   "requestedUrl": "http://localhost:10200/dobetterweb/dbw_tester.html",
   "finalUrl": "http://localhost:10200/dobetterweb/dbw_tester.html",
@@ -43,13 +43,6 @@
           }
         ]
       }
-    },
-    "redirects-http": {
-      "id": "redirects-http",
-      "title": "Redirects HTTP traffic to HTTPS",
-      "description": "If you've already set up HTTPS, make sure that you redirect all HTTP traffic to HTTPS in order to enable secure web features for all your users. [Learn more](https://web.dev/redirects-http/).",
-      "score": null,
-      "scoreDisplayMode": "notApplicable"
     },
     "service-worker": {
       "id": "service-worker",
@@ -3548,6 +3541,10 @@
           {
             "key": "node",
             "itemType": "node",
+            "subItemsHeading": {
+              "key": "relatedNode",
+              "itemType": "node"
+            },
             "text": "Failing Elements"
           }
         ],
@@ -3603,6 +3600,10 @@
           {
             "key": "node",
             "itemType": "node",
+            "subItemsHeading": {
+              "key": "relatedNode",
+              "itemType": "node"
+            },
             "text": "Failing Elements"
           }
         ],
@@ -3754,7 +3755,7 @@
                 "width": 16,
                 "height": 16
               },
-              "snippet": "<img src=\"blob:http://localhost:10200/3f2bc9df-684b-4541-837c-1590152ef65d\">",
+              "snippet": "<img src=\"blob:http://localhost:10200/84c78bd5-a720-43b4-93e0-26591a9ff8ee\">",
               "nodeLabel": "body > img",
               "explanation": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
             }
@@ -3773,7 +3774,7 @@
                 "width": 16,
                 "height": 16
               },
-              "snippet": "<img src=\"filesystem:http://localhost:10200/temporary/empty-0.43448333410631723.png\">",
+              "snippet": "<img src=\"filesystem:http://localhost:10200/temporary/empty-0.48387978403091236.png\">",
               "nodeLabel": "body > img",
               "explanation": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
             }
@@ -3812,6 +3813,10 @@
           {
             "key": "node",
             "itemType": "node",
+            "subItemsHeading": {
+              "key": "relatedNode",
+              "itemType": "node"
+            },
             "text": "Failing Elements"
           }
         ],
@@ -3901,6 +3906,10 @@
           {
             "key": "node",
             "itemType": "node",
+            "subItemsHeading": {
+              "key": "relatedNode",
+              "itemType": "node"
+            },
             "text": "Failing Elements"
           }
         ],
@@ -4004,6 +4013,10 @@
           {
             "key": "node",
             "itemType": "node",
+            "subItemsHeading": {
+              "key": "relatedNode",
+              "itemType": "node"
+            },
             "text": "Failing Elements"
           }
         ],
@@ -5831,6 +5844,11 @@
   "categories": {
     "performance": {
       "title": "Performance",
+      "supportedModes": [
+        "navigation",
+        "timespan",
+        "snapshot"
+      ],
       "auditRefs": [
         {
           "id": "first-contentful-paint",
@@ -6173,6 +6191,10 @@
       "title": "Accessibility",
       "description": "These checks highlight opportunities to [improve the accessibility of your web app](https://developers.google.com/web/fundamentals/accessibility). Only a subset of accessibility issues can be automatically detected so manual testing is also encouraged.",
       "manualDescription": "These items address areas which an automated testing tool cannot cover. Learn more in our guide on [conducting an accessibility review](https://developers.google.com/web/fundamentals/accessibility/how-to-review).",
+      "supportedModes": [
+        "navigation",
+        "snapshot"
+      ],
       "auditRefs": [
         {
           "id": "accesskeys",
@@ -6440,6 +6462,11 @@
     },
     "best-practices": {
       "title": "Best Practices",
+      "supportedModes": [
+        "navigation",
+        "timespan",
+        "snapshot"
+      ],
       "auditRefs": [
         {
           "id": "is-on-https",
@@ -6544,6 +6571,10 @@
       "title": "SEO",
       "description": "These checks ensure that your page is following basic search engine optimization advice. There are many additional factors Lighthouse does not score here that may affect your search ranking, including performance on [Core Web Vitals](https://web.dev/learn-web-vitals/). [Learn more](https://support.google.com/webmasters/answer/35769).",
       "manualDescription": "Run these additional validators on your site to check additional SEO best practices.",
+      "supportedModes": [
+        "navigation",
+        "snapshot"
+      ],
       "auditRefs": [
         {
           "id": "viewport",
@@ -6627,6 +6658,9 @@
       "title": "Progressive Web App",
       "description": "These checks validate the aspects of a Progressive Web App. [Learn more](https://developers.google.com/web/progressive-web-apps/checklist).",
       "manualDescription": "These checks are required by the baseline [PWA Checklist](https://developers.google.com/web/progressive-web-apps/checklist) but are not automatically checked by Lighthouse. They do not affect your score but it's important that you verify them manually.",
+      "supportedModes": [
+        "navigation"
+      ],
       "auditRefs": [
         {
           "id": "installable-manifest",
@@ -6636,11 +6670,6 @@
         {
           "id": "service-worker",
           "weight": 1,
-          "group": "pwa-optimized"
-        },
-        {
-          "id": "redirects-http",
-          "weight": 0,
           "group": "pwa-optimized"
         },
         {
@@ -6816,12 +6845,6 @@
       {
         "startTime": 0,
         "name": "lh:computed:NetworkRecords",
-        "duration": 100,
-        "entryType": "measure"
-      },
-      {
-        "startTime": 0,
-        "name": "lh:audit:redirects-http",
         "duration": 100,
         "entryType": "measure"
       },
@@ -8039,20 +8062,18 @@
       "opportunityResourceColumnLabel": "Opportunity",
       "opportunitySavingsColumnLabel": "Estimated Savings",
       "passedAuditsGroupTitle": "Passed audits",
+      "runtimeAnalysisWindow": "Initial page load",
       "runtimeDesktopEmulation": "Emulated Desktop",
       "runtimeMobileEmulation": "Emulated Moto G4",
       "runtimeNoEmulation": "No emulation",
       "runtimeSettingsAxeVersion": "Axe version",
       "runtimeSettingsBenchmark": "CPU/Memory Power",
-      "runtimeSettingsChannel": "Channel",
       "runtimeSettingsCPUThrottling": "CPU throttling",
       "runtimeSettingsDevice": "Device",
-      "runtimeSettingsFetchTime": "Fetch Time",
       "runtimeSettingsNetworkThrottling": "Network throttling",
-      "runtimeSettingsTitle": "Runtime Settings",
-      "runtimeSettingsUA": "User agent (host)",
       "runtimeSettingsUANetwork": "User agent (network)",
-      "runtimeSettingsUrl": "URL",
+      "runtimeSingleLoad": "Single page load",
+      "runtimeSingleLoadTooltip": "This data is taken from a single page load, as opposed to field data summarizing many sessions.",
       "runtimeUnknown": "Unknown",
       "showRelevantAudits": "Show audits relevant to:",
       "snippetCollapseButtonLabel": "Collapse snippet",
@@ -8088,12 +8109,6 @@
       ],
       "lighthouse-core/audits/is-on-https.js | allowed": [
         "audits[is-on-https].details.items[0].resolution"
-      ],
-      "lighthouse-core/audits/redirects-http.js | title": [
-        "audits[redirects-http].title"
-      ],
-      "lighthouse-core/audits/redirects-http.js | description": [
-        "audits[redirects-http].description"
       ],
       "lighthouse-core/audits/service-worker.js | failureTitle": [
         "audits[service-worker].title"

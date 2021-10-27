@@ -5,11 +5,29 @@
  */
 
 import {FunctionComponent} from 'preact';
+import {useEffect, useState} from 'preact/hooks';
 
 import {NavigationIcon, SnapshotIcon, TimespanIcon} from './icons';
+import {getFilmstripFrames, getScreenDimensions, getScreenshot} from './util';
+
+const ANIMATION_FRAME_DURATION_MS = 500;
 
 export const Separator: FunctionComponent = () => {
   return <div className="Separator" role="separator"></div>;
+};
+
+export const FlowStepIcon: FunctionComponent<{mode: LH.Result.GatherMode}> = ({mode}) => {
+  return <>
+    {
+      mode === 'navigation' && <NavigationIcon/>
+    }
+    {
+      mode === 'timespan' && <TimespanIcon/>
+    }
+    {
+      mode === 'snapshot' && <SnapshotIcon/>
+    }
+  </>;
 };
 
 export const FlowSegment: FunctionComponent<{mode?: LH.Result.GatherMode}> = ({mode}) => {
@@ -17,15 +35,76 @@ export const FlowSegment: FunctionComponent<{mode?: LH.Result.GatherMode}> = ({m
     <div className="FlowSegment">
       <div className="FlowSegment__top-line"/>
       {
-        mode === 'navigation' && <NavigationIcon/>
-      }
-      {
-        mode === 'timespan' && <TimespanIcon/>
-      }
-      {
-        mode === 'snapshot' && <SnapshotIcon/>
+        mode && <FlowStepIcon mode={mode}/>
       }
       <div className="FlowSegment__bottom-line"/>
     </div>
   );
+};
+
+const FlowStepAnimatedThumbnail: FunctionComponent<{
+  frames: Array<{data: string}>,
+  width: number,
+  height: number,
+}> = ({frames, width, height}) => {
+  const [frameIndex, setFrameIndex] = useState(0);
+  // Handle a frame array of a different length being set.
+  const effectiveFrameIndex = frameIndex % frames.length;
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => setFrameIndex(i => (i + 1) % frames.length),
+      ANIMATION_FRAME_DURATION_MS
+    );
+
+    return () => clearInterval(interval);
+  }, [frames.length]);
+
+  return (
+    <img
+      className="FlowStepThumbnail"
+      data-testid="FlowStepAnimatedThumbnail"
+      src={frames[effectiveFrameIndex].data}
+      style={{width, height}}
+      alt="Animated screenshots of a page tested by Lighthouse"
+    />
+  );
+};
+
+export const FlowStepThumbnail: FunctionComponent<{
+  reportResult: LH.ReportResult,
+  width?: number,
+  height?: number,
+}> = ({reportResult, width, height}) => {
+  const screenshot = getScreenshot(reportResult);
+  const frames = getFilmstripFrames(reportResult);
+
+  // Resize the image to fit the viewport aspect ratio.
+  const dimensions = getScreenDimensions(reportResult);
+  if (width && height === undefined) {
+    height = dimensions.height * width / dimensions.width;
+  } else if (height && width === undefined) {
+    width = dimensions.width * height / dimensions.height;
+  }
+
+  if (!width || !height) {
+    console.warn(new Error('FlowStepThumbnail requested without any dimensions').stack);
+    return <></>;
+  }
+
+  if (reportResult.gatherMode === 'timespan' && frames && frames.length) {
+    return <FlowStepAnimatedThumbnail frames={frames} width={width} height={height} />;
+  }
+
+  return <>
+    {
+      screenshot &&
+        <img
+          className="FlowStepThumbnail"
+          src={screenshot}
+          style={{width, height}}
+          alt="Screenshot of a page tested by Lighthouse"
+        />
+    }
+  </>;
 };

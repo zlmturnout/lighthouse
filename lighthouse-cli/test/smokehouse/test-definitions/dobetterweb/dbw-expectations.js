@@ -314,10 +314,18 @@ const expectations = {
       'deprecations': {
         score: 0,
         details: {
-          items: {
-          // Note: HTML Imports added to deprecations in m70, so 3 before, 4 after.
-            length: '>=3',
-          },
+          items: [
+            {
+              value: /Application Cache API manifest/,
+              _maxChromiumMilestone: 94,
+            },
+            {
+              value: /'window.webkitStorageInfo' is deprecated/,
+            },
+            {
+              value: /Synchronous XMLHttpRequest on the main thread is deprecated/,
+            },
+          ],
         },
       },
       'password-inputs-can-be-pasted-into': {

@@ -12,7 +12,8 @@ import fs from 'fs';
 import yargs from 'yargs';
 import * as yargsHelpers from 'yargs/helpers';
 
-import {isObjectOfUnknownValues} from '../lighthouse-core/lib/type-verifiers.js';
+import {LH_ROOT} from '../root.js';
+import {isObjectOfUnknownValues} from '../shared/type-verifiers.js';
 
 /**
  * @param {string=} manualArgv
@@ -26,6 +27,7 @@ function getFlags(manualArgv, options = {}) {
     yargs(yargsHelpers.hideBin(process.argv));
 
   let parser = y.help('help')
+      .version(JSON.parse(fs.readFileSync(`${LH_ROOT}/package.json`, 'utf-8')).version)
       .showHelpOnFail(false, 'Specify --help for available options')
 
       .usage('lighthouse <url> <options>')
@@ -102,6 +104,11 @@ function getFlags(manualArgv, options = {}) {
           type: 'boolean',
           default: false,
           describe: 'Prints a list of all available audits and exits',
+        },
+        'list-locales': {
+          type: 'boolean',
+          default: false,
+          describe: 'Prints a list of all supported locales and exits',
         },
         'list-trace-categories': {
           type: 'boolean',
@@ -208,7 +215,7 @@ function getFlags(manualArgv, options = {}) {
         },
       })
       .group([
-        'save-assets', 'list-all-audits', 'list-trace-categories', 'print-config', 'additional-trace-categories',
+        'save-assets', 'list-all-audits', 'list-locales', 'list-trace-categories', 'print-config', 'additional-trace-categories',
         'config-path', 'preset', 'chrome-flags', 'port', 'hostname', 'form-factor', 'screenEmulation', 'emulatedUserAgent',
         'max-wait-for-load', 'enable-error-reporting', 'gather-mode', 'audit-mode',
         'only-audits', 'only-categories', 'skip-audits', 'budget-path',
@@ -312,7 +319,7 @@ function getFlags(manualArgv, options = {}) {
         //   - We're just printing the config.
         //   - We're in auditMode (and we have artifacts already)
         // If one of these don't apply, if no URL, stop the program and ask for one.
-        const isPrintSomethingMode = argv.listAllAudits || argv.listTraceCategories || argv.printConfig;
+        const isPrintSomethingMode = argv.listAllAudits || argv.listLocales || argv.listTraceCategories || argv.printConfig;
         const isOnlyAuditMode = !!argv.auditMode && !argv.gatherMode;
         if (isPrintSomethingMode || isOnlyAuditMode) {
           return true;

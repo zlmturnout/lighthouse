@@ -1,3 +1,200 @@
+<a name="8.6.0"></a>
+# 8.6.0 (2021-10-13)
+[Full Changelog](https://github.com/GoogleChrome/lighthouse/compare/v8.5.1...v8.6.0)
+
+We expect this release to ship in the DevTools of [Chrome 97](https://chromiumdash.appspot.com/schedule), and to PageSpeed Insights within 2 weeks.
+
+## New Contributors
+
+Thanks to our new contributors 👽🐷🐰🐯🐻! 
+
+- meehawk @meehawk
+- Edwin Gustafson @edwingustafson
+- Yorkie Liu @yorkie
+
+## Core
+
+* crawlable-anchors: ignore event listeners, validate url ([#13105](https://github.com/GoogleChrome/lighthouse/pull/13105))
+* full-page-screenshot: fix emulation reset ([#13175](https://github.com/GoogleChrome/lighthouse/pull/13175))
+* response-compression: add x-content-encoding-over-network ([#13176](https://github.com/GoogleChrome/lighthouse/pull/13176))
+* share localization between core and report ([#13146](https://github.com/GoogleChrome/lighthouse/pull/13146))
+* update cdt SourceMap to latest devtools frontend ([#13095](https://github.com/GoogleChrome/lighthouse/pull/13095))
+* stack-packs: simplify i18n filename lookup ([#13133](https://github.com/GoogleChrome/lighthouse/pull/13133))
+
+## ⛏️👷 Fraggle Rock
+
+  Support for auditing user flows ([#11313](https://github.com/GoogleChrome/lighthouse/issues/11313))
+
+* add UserFlow usability improvements ([#13139](https://github.com/GoogleChrome/lighthouse/pull/13139))
+* add `supportedModes` filter to categories ([#13161](https://github.com/GoogleChrome/lighthouse/pull/13161))
+* handle cached timespan records ([#13181](https://github.com/GoogleChrome/lighthouse/pull/13181))
+* add parity logging ([#13114](https://github.com/GoogleChrome/lighthouse/pull/13114))
+* animate timespan thumbnail ([#13178](https://github.com/GoogleChrome/lighthouse/pull/13178))
+* refine snapshot and timespan performance ([#13184](https://github.com/GoogleChrome/lighthouse/pull/13184))
+* topbar save button ([#13109](https://github.com/GoogleChrome/lighthouse/pull/13109))
+* elide step name ([#13171](https://github.com/GoogleChrome/lighthouse/pull/13171))
+* localized sample ([#13143](https://github.com/GoogleChrome/lighthouse/pull/13143))
+* timeline header ([#13128](https://github.com/GoogleChrome/lighthouse/pull/13128))
+* add help dialog to explain flows ([#13159](https://github.com/GoogleChrome/lighthouse/pull/13159))
+* collect i18n strings ([#13152](https://github.com/GoogleChrome/lighthouse/pull/13152))
+
+## CLI
+
+* add list-locales flag ([#12983](https://github.com/GoogleChrome/lighthouse/pull/12983))
+* always return correct version ([#13130](https://github.com/GoogleChrome/lighthouse/pull/13130))
+
+## Report
+
+* move logger styles into js ([#13204](https://github.com/GoogleChrome/lighthouse/pull/13204))
+* remove href from category score gauge ([#13180](https://github.com/GoogleChrome/lighthouse/pull/13180))
+* inject report/assets/styles.css via components.js ([#13057](https://github.com/GoogleChrome/lighthouse/pull/13057))
+* remove smooth scrolling css ([#13102](https://github.com/GoogleChrome/lighthouse/pull/13102))
+* add lh- prefix to remaining show class ([#13203](https://github.com/GoogleChrome/lighthouse/pull/13203))
+* handle gauge fragment links in script ([#13186](https://github.com/GoogleChrome/lighthouse/pull/13186))
+
+## Clients
+
+* psi: include global reports styles in legacy psi rendering ([#13151](https://github.com/GoogleChrome/lighthouse/pull/13151))
+* viewer: swap locale ([#10148](https://github.com/GoogleChrome/lighthouse/pull/10148), [#13192](https://github.com/GoogleChrome/lighthouse/pull/13192))
+* viewer: remove devtools disclaimer ([#13145](https://github.com/GoogleChrome/lighthouse/pull/13145))
+* viewer: add body styles ([#13144](https://github.com/GoogleChrome/lighthouse/pull/13144))
+* viewer: upgrade to firebase 9 ([#13115](https://github.com/GoogleChrome/lighthouse/pull/13115))
+* viewer: use access token regardless of firebase auth ([#13116](https://github.com/GoogleChrome/lighthouse/pull/13116))
+* viewer: use new firebase credentials ([#13110](https://github.com/GoogleChrome/lighthouse/pull/13110))
+
+## I18n
+
+* import ([#13206](https://github.com/GoogleChrome/lighthouse/pull/13206))
+
+## Docs
+
+* correct the Node.js version base ([#13099](https://github.com/GoogleChrome/lighthouse/pull/13099))
+* add user flow docs ([#13134](https://github.com/GoogleChrome/lighthouse/pull/13134))
+
+## Tests
+
+* smoke: make specific assertions about deprecations ([#13191](https://github.com/GoogleChrome/lighthouse/pull/13191))
+* update deprecations smoke for M96 ([#13179](https://github.com/GoogleChrome/lighthouse/pull/13179))
+* make yarn unit run all available unit tests ([#13148](https://github.com/GoogleChrome/lighthouse/pull/13148))
+* centralize running of docs tests ([#13150](https://github.com/GoogleChrome/lighthouse/pull/13150))
+* split out axe test ([#13142](https://github.com/GoogleChrome/lighthouse/pull/13142))
+
+## Misc
+
+* convert lighthouse-core/scripts to ES modules ([#13121](https://github.com/GoogleChrome/lighthouse/pull/13121))
+* remove patrick from issue assigner ([#13194](https://github.com/GoogleChrome/lighthouse/pull/13194))
+* set predictable order for sample json timing entries ([#13162](https://github.com/GoogleChrome/lighthouse/pull/13162))
+* scripts: fix run-devtools sniffing, add error checking ([#13163](https://github.com/GoogleChrome/lighthouse/pull/13163))
+* ensure psi.espanol sample-report es en espanol ([#13160](https://github.com/GoogleChrome/lighthouse/pull/13160))
+* add notes about software versions in issue template ([#13089](https://github.com/GoogleChrome/lighthouse/pull/13089))
+* build: fix smokehouse bundle ([#13135](https://github.com/GoogleChrome/lighthouse/pull/13135))
+* build: fix vercel deployment by adopting stricter `engines` grammar ([#13183](https://github.com/GoogleChrome/lighthouse/pull/13183))
+* build: create rollup-plugins.js helper module ([#13122](https://github.com/GoogleChrome/lighthouse/pull/13122))
+* build: don't build flow if only --standalone is requested ([#13124](https://github.com/GoogleChrome/lighthouse/pull/13124))
+
+
+<a name="8.5.1"></a>
+# 8.5.1 (2021-09-22)
+[Full Changelog](https://github.com/GoogleChrome/lighthouse/compare/v8.5.0...v8.5.1)
+
+This is a patch release to fix an issue in the CLI when [error reporting](./docs/error-reporting.md) has been enabled.
+
+## New Contributors
+
+Thanks to our new contributor 👽🐷🐰🐯🐻!
+
+- Yorkie Liu @yorkie
+
+## CLI
+
+* fix crash with Sentry init ([#13104](https://github.com/GoogleChrome/lighthouse/pull/13104))
+
+## ⛏️👷 Fraggle Rock
+
+  Support for auditing user flows ([#11313](https://github.com/GoogleChrome/lighthouse/issues/11313))
+
+* add API for constructing flow result ([#13034](https://github.com/GoogleChrome/lighthouse/pull/13034))
+* add category tooltips to flow report ([#13043](https://github.com/GoogleChrome/lighthouse/pull/13043))
+
+<a name="8.5.0"></a>
+# 8.5.0 (2021-09-21)
+[Full Changelog](https://github.com/GoogleChrome/lighthouse/compare/v8.4.0...v8.5.0)
+
+We expect this release to ship in the DevTools of [Chrome 96](https://chromiumdash.appspot.com/schedule), and to PageSpeed Insights within 2 weeks.
+
+## New Contributors
+
+Thanks to our new contributors 👽🐷🐰🐯🐻!
+
+- Konstantin Popov @KonstHardy
+- Can Umay @canumay
+
+## Core
+
+* lazy-lcp: fix failureTitle in lcp-lazy-loaded ([#13049](https://github.com/GoogleChrome/lighthouse/pull/13049))
+* tracing: remove cpu_profiler.hires ([#13056](https://github.com/GoogleChrome/lighthouse/pull/13056))
+* tsc: add base tsconfig for config inheritance ([#13072](https://github.com/GoogleChrome/lighthouse/pull/13072))
+* make main tsc compile cacheable ([#13069](https://github.com/GoogleChrome/lighthouse/pull/13069))
+
+## ⛏️👷 Fraggle Rock
+
+  Support for auditing user flows ([#11313](https://github.com/GoogleChrome/lighthouse/issues/11313))
+
+* cleanup driver on run completion ([#13062](https://github.com/GoogleChrome/lighthouse/pull/13062))
+* setup emulation and throttling for timespans ([#13058](https://github.com/GoogleChrome/lighthouse/pull/13058))
+* support additionalTraceCategories ([#13030](https://github.com/GoogleChrome/lighthouse/pull/13030))
+* add support for plugins ([#13028](https://github.com/GoogleChrome/lighthouse/pull/13028))
+* move GatherContext to baseArtifacts ([#13033](https://github.com/GoogleChrome/lighthouse/pull/13033))
+* preserve traces on failed page load ([#13027](https://github.com/GoogleChrome/lighthouse/pull/13027))
+* move HostUserAgent/FormFactor back to base artifacts ([#12969](https://github.com/GoogleChrome/lighthouse/pull/12969))
+* use devtools throttling by default in timespan mode ([#13013](https://github.com/GoogleChrome/lighthouse/pull/13013))
+* collect OOPIF network data ([#12992](https://github.com/GoogleChrome/lighthouse/pull/12992))
+* flow: summary sections ([#13086](https://github.com/GoogleChrome/lighthouse/pull/13086))
+* flow: topbar ([#13065](https://github.com/GoogleChrome/lighthouse/pull/13065))
+
+## CLI
+
+* convert to ES modules ([#13045](https://github.com/GoogleChrome/lighthouse/pull/13045))
+
+## Report
+
+* make metric value more prominent in table ([#13036](https://github.com/GoogleChrome/lighthouse/pull/13036))
+* 3p-filter: drop for/id as elements are already nested ([#13067](https://github.com/GoogleChrome/lighthouse/pull/13067))
+* add gatherMode option to category score ([#13029](https://github.com/GoogleChrome/lighthouse/pull/13029))
+* add fractional category scores ([#13009](https://github.com/GoogleChrome/lighthouse/pull/13009))
+
+## Deps
+
+* update to latest @rollup/plugin-typescript ([#13075](https://github.com/GoogleChrome/lighthouse/pull/13075))
+* snyk: update snyk snapshot ([#13019](https://github.com/GoogleChrome/lighthouse/pull/13019))
+
+## Clients
+
+* lr: bundle smokehouse as commonjs ([#13074](https://github.com/GoogleChrome/lighthouse/pull/13074))
+* add canonical link to viewer and treemap ([#13032](https://github.com/GoogleChrome/lighthouse/pull/13032))
+
+## Docs
+
+* readme: add Peyk to the list of integrations ([#13055](https://github.com/GoogleChrome/lighthouse/pull/13055))
+
+## Tests
+
+* add FR integration scenarios ([#13092](https://github.com/GoogleChrome/lighthouse/pull/13092))
+* update SVGOMG expectations ([#13088](https://github.com/GoogleChrome/lighthouse/pull/13088))
+* restore use of latest node 16 in CI ([#13079](https://github.com/GoogleChrome/lighthouse/pull/13079))
+* eslint: trailing commas for import/export ([#13059](https://github.com/GoogleChrome/lighthouse/pull/13059))
+* smokehouse: add flag for test sharding ([#13047](https://github.com/GoogleChrome/lighthouse/pull/13047))
+* smokehouse: convert to ES modules ([#13046](https://github.com/GoogleChrome/lighthouse/pull/13046))
+* fix flaky robots smoke failure ([#13031](https://github.com/GoogleChrome/lighthouse/pull/13031))
+* smoke: upload smokehouse artifacts on failure ([#13010](https://github.com/GoogleChrome/lighthouse/pull/13010))
+
+## Misc
+
+* build: fix minifyFileTransform stream bug in Node 16 ([#13073](https://github.com/GoogleChrome/lighthouse/pull/13073))
+* fix typo in lighthouse-treemap/app/src/main.js ([#13076](https://github.com/GoogleChrome/lighthouse/pull/13076))
+* proto: add i18n.icuMessagePaths ([#13068](https://github.com/GoogleChrome/lighthouse/pull/13068))
+* remove all FR-COMPAT todos ([#13023](https://github.com/GoogleChrome/lighthouse/pull/13023))
+
 <a name="8.4.0"></a>
 # 8.4.0 (2021-09-08)
 [Full Changelog](https://github.com/GoogleChrome/lighthouse/compare/v8.3.0...v8.4.0)
@@ -8,11 +205,11 @@ We expect this release to ship in the DevTools of [Chrome 95](https://chromiumda
 
 Thanks to our new contributors 👽🐷🐰🐯🐻!
 
-Emmanouil Zoumpoulakis @emzoumpo
-Milutin Kristofic @milutin
-Bjørn Erik Pedersen @bep
-Jerome Cukier @jckr
-Saurav Kumar @svkrclg
+- Emmanouil Zoumpoulakis @emzoumpo
+- Milutin Kristofic @milutin
+- Bjørn Erik Pedersen @bep
+- Jerome Cukier @jckr
+- Saurav Kumar @svkrclg
 
 ## New Audits
 

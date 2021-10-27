@@ -30,7 +30,7 @@ jest.unstable_mockModule('../../sentry-prompt.js', () => {
 });
 
 const mockSentryInit = jest.fn();
-jest.unstable_mockModule('../../../lighthouse-core/lib/sentry.js', () => {
+jest.mock('../../../lighthouse-core/lib/sentry.js', () => {
   return {init: mockSentryInit};
 });
 
@@ -76,6 +76,7 @@ beforeEach(async () => {
     hostname: '',
     // Command modes
     listAllAudits: false,
+    listLocales: false,
     listTraceCategories: false,
     printConfig: false,
   };
