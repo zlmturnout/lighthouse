@@ -211,10 +211,7 @@ async function cli(argv) {
 
 // Test if called from the CLI or as a module.
 if (require.main === module) {
-  cli(process.argv).catch(e => {
-    console.error(e);
-    process.exit(1);
-  });
+  cli(process.argv);
 } else {
   module.exports = {
     /** The commit hash for the current HEAD. */
