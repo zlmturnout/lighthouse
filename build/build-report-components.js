@@ -217,7 +217,10 @@ async function main() {
 }
 
 if (require.main === module) {
-  main();
+  main().catch(e => {
+    console.error(e);
+    process.exit(1);
+  });
 }
 
 module.exports = {normalizeTextNodeText};
