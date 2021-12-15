@@ -5,6 +5,8 @@
  */
 'use strict';
 
+const assert = require('assert');
+
 /**
  * @fileoverview Extracts information about illegible text from the page.
  *
@@ -90,6 +92,25 @@ function findMostSpecificMatchedCSSRule(matchedCSSRules = [], isDeclarationOfInt
         maxSpecificityRule = rule;
       }
     }
+  }
+
+  const rules = matchedCSSRules.filter(rule => isDeclarationOfInterest(rule.rule.style));
+  const fasterReturn = rules.length ? rules[rules.length - 1].rule : undefined;
+
+  let ok = false;
+  try {
+    assert.deepStrictEqual(fasterReturn, maxSpecificityRule);
+    ok = true;
+  } catch {
+    // blah
+  }
+
+  if (!ok) {
+    console.log(JSON.stringify(rules, null, 2));
+    console.log(
+      'does not match! ' +
+      JSON.stringify({original: maxSpecificityRule, faster: fasterReturn}, null, 2));
+    assert.deepStrictEqual(fasterReturn, maxSpecificityRule);
   }
 
   if (maxSpecificityRule) {
