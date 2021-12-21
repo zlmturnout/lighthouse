@@ -5,6 +5,8 @@
  */
 'use strict';
 
+/* global globalThis */
+
 const lighthouse = require('../lighthouse-core/index.js');
 const RawProtocol = require('../lighthouse-core/gather/connections/raw.js');
 const log = require('lighthouse-logger');
@@ -13,6 +15,11 @@ const {registerLocaleData, getCanonicalLocales} = require('../shared/localizatio
 const constants = require('../lighthouse-core/config/constants.js');
 
 /** @typedef {import('../lighthouse-core/gather/connections/connection.js')} Connection */
+
+// Rollup seems to overlook some references to `Buffer`, so it must be made explicit.
+// (`parseSourceMapFromDataUrl` breaks without this)
+/** @type {BufferConstructor} */
+globalThis.Buffer = require('buffer').Buffer;
 
 /**
  * Returns a config, which runs only certain categories.
@@ -71,16 +78,6 @@ function lookupCanonicalLocale(locales) {
   return lookupLocale(locales, getCanonicalLocales());
 }
 
-// For the bundle smoke test.
-if (typeof module !== 'undefined' && module.exports) {
-  // Ideally this could be exposed via browserify's `standalone`, but it doesn't
-  // work for LH because of https://github.com/browserify/browserify/issues/968
-  // Instead, since this file is only ever run in node for testing, expose a
-  // bundle entry point as global.
-  // @ts-expect-error
-  global.runBundledLighthouse = lighthouse;
-}
-
 // Expose only in DevTools' worker
 if (typeof self !== 'undefined') {
   // TODO: refactor and delete `global.isDevtools`.
@@ -99,4 +96,8 @@ if (typeof self !== 'undefined') {
   // TODO: expose as lookupCanonicalLocale in LighthouseService.ts?
   // @ts-expect-error
   self.lookupLocale = lookupCanonicalLocale;
+} else {
+  // For the bundle smoke test.
+  // @ts-expect-error
+  global.runBundledLighthouse = lighthouse;
 }

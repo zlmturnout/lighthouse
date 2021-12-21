@@ -39,7 +39,7 @@ async function runLighthouse(url, configJson, testRunnerOptions = {}) {
   const tmpPath = await fs.mkdtemp(`${tmpDir}/smokehouse-`);
   return internalRun(url, tmpPath, configJson, testRunnerOptions)
     // Wait for internalRun() before removing scratch directory.
-    .finally(() => !isDebug && fs.rmdir(tmpPath, {recursive: true}));
+    .finally(() => !isDebug && fs.rm(tmpPath, {recursive: true, force: true}));
 }
 
 /**
@@ -133,7 +133,7 @@ async function internalRun(url, tmpPath, configJson, options) {
 
   // There should either be both an error exitCode and a lhr.runtimeError or neither.
   if (Boolean(exitCode) !== Boolean(lhr.runtimeError)) {
-    const runtimeErrorCode = lhr.runtimeError && lhr.runtimeError.code;
+    const runtimeErrorCode = lhr.runtimeError?.code;
     throw new ChildProcessError(`Lighthouse did not exit with an error correctly, exiting with ${exitCode} but with runtimeError '${runtimeErrorCode}'`, // eslint-disable-line max-len
         localConsole.getLog());
   }

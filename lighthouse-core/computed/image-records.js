@@ -5,6 +5,7 @@
  */
 'use strict';
 
+const URL = require('../lib/url-shim.js');
 const makeComputedArtifact = require('./computed-artifact.js');
 
 class ImageRecords {
@@ -28,22 +29,22 @@ class ImageRecords {
 
   /**
    * @param {{ImageElements: LH.Artifacts['ImageElements'], networkRecords: LH.Artifacts.NetworkRequest[]}} data
-   * @return {Promise<LH.Artifacts.ImageElement[]>}
+   * @return {Promise<LH.Artifacts.ImageElementRecord[]>}
    */
   static async compute_(data) {
     const indexedNetworkRecords = ImageRecords.indexNetworkRecords(data.networkRecords);
 
-    /** @type {LH.Artifacts.ImageElement[]} */
+    /** @type {LH.Artifacts.ImageElementRecord[]} */
     const imageRecords = [];
 
     for (const element of data.ImageElements) {
       const networkRecord = indexedNetworkRecords[element.src];
-      const mimeType = networkRecord && networkRecord.mimeType;
+      const mimeType = networkRecord?.mimeType;
 
       // Don't change the guessed mime type if no mime type was found.
       imageRecords.push({
         ...element,
-        mimeType: mimeType ? mimeType : element.mimeType,
+        mimeType: mimeType ? mimeType : URL.guessMimeType(element.src),
       });
     }
 
@@ -58,5 +59,5 @@ class ImageRecords {
   }
 }
 
-module.exports = makeComputedArtifact(ImageRecords);
+module.exports = makeComputedArtifact(ImageRecords, ['ImageElements', 'networkRecords']);
 

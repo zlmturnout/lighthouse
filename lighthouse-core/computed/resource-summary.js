@@ -10,7 +10,7 @@ const NetworkRecords = require('./network-records.js');
 const URL = require('../lib/url-shim.js');
 const NetworkRequest = require('../lib/network-request.js');
 const Budget = require('../config/budget.js');
-const Util = require('../util-commonjs.js');
+const {Util} = require('../util-commonjs.js');
 
 /** @typedef {{count: number, resourceSize: number, transferSize: number}} ResourceEntry */
 
@@ -55,7 +55,7 @@ class ResourceSummary {
     const budget = Budget.getMatchingBudget(budgets, mainResourceURL);
     /** @type {ReadonlyArray<string>} */
     let firstPartyHosts = [];
-    if (budget && budget.options && budget.options.firstPartyHostnames) {
+    if (budget?.options?.firstPartyHostnames) {
       firstPartyHosts = budget.options.firstPartyHostnames;
     } else {
       const rootDomain = Util.getRootDomain(mainResourceURL);
@@ -111,4 +111,4 @@ class ResourceSummary {
   }
 }
 
-module.exports = makeComputedArtifact(ResourceSummary);
+module.exports = makeComputedArtifact(ResourceSummary, ['URL', 'devtoolsLog', 'budgets']);

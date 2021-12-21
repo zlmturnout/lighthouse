@@ -33,17 +33,17 @@ export class SwapLocaleFeature {
       throw new Error('missing icuMessagePaths');
     }
 
-    this._dom.find('.lh-tools-locale', this._dom.document()).classList.remove('lh-hidden');
+    this._dom.find('.lh-tools-locale', this._dom.rootEl).classList.remove('lh-hidden');
 
     const currentLocale = this._reportUIFeatures.json.configSettings.locale;
 
-    const containerEl = this._dom.find('.lh-tools-locale__selector-wrapper', this._dom.document());
+    const containerEl = this._dom.find('.lh-tools-locale__selector-wrapper', this._dom.rootEl);
     containerEl.removeAttribute('aria-hidden');
     const selectEl = this._dom.createChildOf(containerEl, 'select', 'lh-locale-selector');
     selectEl.name = 'lh-locale-list';
     selectEl.setAttribute('role', 'menuitem');
 
-    const toggleEl = this._dom.find('.lh-tool-locale__button', this._dom.document());
+    const toggleEl = this._dom.find('.lh-tool-locale__button', this._dom.rootEl);
     toggleEl.addEventListener('click', () => {
       toggleEl.classList.toggle('lh-active');
     });
@@ -53,13 +53,8 @@ export class SwapLocaleFeature {
       optionEl.value = locale;
       if (locale === currentLocale) optionEl.selected = true;
 
-      // @ts-expect-error: waiting for typescript 4.5. Might need to add "ES2020.Intl"
-      // to tsconfig libs.
-      // https://github.com/microsoft/TypeScript/pull/44022#issuecomment-915087098
       if (window.Intl && Intl.DisplayNames) {
-        // @ts-expect-error
         const currentLocaleDisplay = new Intl.DisplayNames([currentLocale], {type: 'language'});
-        // @ts-expect-error
         const optionLocaleDisplay = new Intl.DisplayNames([locale], {type: 'language'});
 
         const optionLocaleName = optionLocaleDisplay.of(locale);

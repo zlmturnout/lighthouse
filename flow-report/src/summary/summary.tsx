@@ -44,7 +44,7 @@ const SummaryNavigationHeader: FunctionComponent<{lhr: LH.Result}> = ({lhr}) => 
 /**
  * The div should behave like a JSX <>...</>. This still allows us to identify "rows" with CSS selectors.
  */
-export const SummaryFlowStep: FunctionComponent<{
+const SummaryFlowStep: FunctionComponent<{
   lhr: LH.Result,
   label: string,
   hashIndex: number,
@@ -63,7 +63,7 @@ export const SummaryFlowStep: FunctionComponent<{
             <Separator/>
           </div>
       }
-      <FlowStepThumbnail reportResult={reportResult} width={THUMBNAIL_WIDTH}/>
+      <FlowStepThumbnail lhr={lhr} width={THUMBNAIL_WIDTH}/>
       <FlowSegment mode={lhr.gatherMode}/>
       <div className="SummaryFlowStep__label">
         <div className="SummaryFlowStep__mode">{modeDescription}</div>
@@ -76,6 +76,7 @@ export const SummaryFlowStep: FunctionComponent<{
             category={reportResult.categories[c]}
             href={`#index=${hashIndex}&anchor=${c}`}
             gatherMode={lhr.gatherMode}
+            finalUrl={lhr.finalUrl}
           />
         ))
       }
@@ -105,7 +106,7 @@ const SummaryFlow: FunctionComponent = () => {
   );
 };
 
-export const SummaryHeader: FunctionComponent = () => {
+const SummaryHeader: FunctionComponent = () => {
   const flowResult = useFlowResult();
   const strings = useLocalizedStrings();
   const str_ = useStringFormatter();
@@ -150,7 +151,7 @@ const SummarySectionHeader: FunctionComponent = ({children}) => {
   );
 };
 
-export const Summary: FunctionComponent = () => {
+const Summary: FunctionComponent = () => {
   const strings = useLocalizedStrings();
 
   return (
@@ -161,4 +162,10 @@ export const Summary: FunctionComponent = () => {
       <SummaryFlow/>
     </div>
   );
+};
+
+export {
+  SummaryFlowStep,
+  SummaryHeader,
+  Summary,
 };

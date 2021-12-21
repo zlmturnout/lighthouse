@@ -11,6 +11,8 @@ const InstallableManifestAudit = require('../../lighthouse-core/audits/installab
 
 /* eslint-env jest */
 
+jest.setTimeout(20_000);
+
 describe('installabilityErrors', () => {
   let chromiumErrorIds;
 
@@ -74,8 +76,7 @@ Array [
 `);
   });
 
-  // TODO: https://github.com/GoogleChrome/lighthouse/issues/13147
-  it.skip('are each handled explicitly in the gatherer', () => {
+  it('are each handled explicitly in the gatherer', () => {
     const errorStrings = Object.keys(InstallableManifestAudit.UIStrings)
       .filter(key => chromiumErrorIds.includes(key))
       .sort();

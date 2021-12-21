@@ -10,6 +10,7 @@
   */
 'use strict';
 
+const {Buffer} = require('buffer');
 const FRGatherer = require('../../../fraggle-rock/gather/base-gatherer.js');
 const URL = require('../../../lib/url-shim.js');
 const Sentry = require('../../../lib/sentry.js');
@@ -42,7 +43,7 @@ class ResponseCompression extends FRGatherer {
   meta = {
     supportedModes: ['timespan', 'navigation'],
     dependencies: {DevtoolsLog: DevtoolsLog.symbol},
-  }
+  };
 
   /**
    * @param {LH.Artifacts.NetworkRequest[]} networkRecords

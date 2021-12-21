@@ -17,14 +17,17 @@ import tsc from 'typescript';
 import MessageParser from 'intl-messageformat-parser';
 import esMain from 'es-main';
 
-import Util from '../../../lighthouse-core/util-commonjs.js';
+import {Util} from '../../../lighthouse-core/util-commonjs.js';
 import {collectAndBakeCtcStrings} from './bake-ctc-to-lhl.js';
 import {pruneObsoleteLhlMessages} from './prune-obsolete-lhl-messages.js';
 import {countTranslatedMessages} from './count-translated.js';
 import {LH_ROOT} from '../../../root.js';
 import {resolveModulePath} from '../esm-utils.js';
 
-const UISTRINGS_REGEX = /UIStrings = .*?\};\n/s;
+// Match declarations of UIStrings, terminating in either a `};\n` (very likely to always be right)
+// or `}\n\n` (allowing semicolon to be optional, but insisting on a double newline so that an
+// closing brace in the middle of the declaration does not prematurely end the pattern)
+const UISTRINGS_REGEX = /UIStrings = .*?\}(;|\n)\n/s;
 
 /** @typedef {import('./bake-ctc-to-lhl.js').CtcMessage} CtcMessage */
 /** @typedef {Required<Pick<CtcMessage, 'message'|'placeholders'>>} IncrementalCtc */
@@ -33,7 +36,7 @@ const UISTRINGS_REGEX = /UIStrings = .*?\};\n/s;
 const foldersWithStrings = [
   `${LH_ROOT}/lighthouse-core`,
   `${LH_ROOT}/report/renderer`,
-  `${LH_ROOT}/lighthouse-treemap`,
+  `${LH_ROOT}/treemap`,
   `${LH_ROOT}/flow-report`,
   path.dirname(resolveModulePath('lighthouse-stack-packs')) + '/packs',
 ];
@@ -47,7 +50,7 @@ const ignoredPathComponents = [
   '**/*-test.js',
   '**/*-renderer.js',
   '**/util-commonjs.js',
-  'lighthouse-treemap/app/src/main.js',
+  'treemap/app/src/main.js',
 ];
 
 /**
@@ -552,7 +555,7 @@ async function collectAllStringsInDir(dir) {
     const content = fs.readFileSync(absolutePath, 'utf8');
     const exportVars = await import(absolutePath);
     const regexMatch = content.match(UISTRINGS_REGEX);
-    const exportedUIStrings = exportVars.UIStrings || (exportVars.default && exportVars.default.UIStrings);
+    const exportedUIStrings = exportVars.UIStrings || exportVars.default?.UIStrings;
 
     if (!regexMatch) {
       // No UIStrings found in the file text or exports, so move to the next.
@@ -650,10 +653,6 @@ function resolveMessageCollisions(strings) {
 
   try {
     expect(collidingMessages).toEqual([
-      '$MARKDOWN_SNIPPET_0$ elements do not have $MARKDOWN_SNIPPET_1$ text',
-      '$MARKDOWN_SNIPPET_0$ elements do not have $MARKDOWN_SNIPPET_1$ text',
-      '$MARKDOWN_SNIPPET_0$ elements have $MARKDOWN_SNIPPET_1$ text',
-      '$MARKDOWN_SNIPPET_0$ elements have $MARKDOWN_SNIPPET_1$ text',
       'ARIA $MARKDOWN_SNIPPET_0$ elements do not have accessible names.',
       'ARIA $MARKDOWN_SNIPPET_0$ elements do not have accessible names.',
       'ARIA $MARKDOWN_SNIPPET_0$ elements do not have accessible names.',
@@ -675,8 +674,6 @@ function resolveMessageCollisions(strings) {
       'Name',
       'Potential Savings',
       'Potential Savings',
-      'URL',
-      'URL',
     ]);
   } catch (err) {
     console.log('The number of duplicate strings has changed. Consider duplicating the `description` to match existing strings so they\'re translated together or update this assertion if they must absolutely be translated separately');

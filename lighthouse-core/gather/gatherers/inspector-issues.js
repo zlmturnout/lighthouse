@@ -19,7 +19,7 @@ class InspectorIssues extends FRGatherer {
   meta = {
     supportedModes: ['timespan', 'navigation'],
     dependencies: {DevtoolsLog: DevtoolsLog.symbol},
-  }
+  };
 
   constructor() {
     super();
@@ -69,12 +69,14 @@ class InspectorIssues extends FRGatherer {
       heavyAds: [],
       /** @type {Array<LH.Crdp.Audits.ContentSecurityPolicyIssueDetails>} */
       contentSecurityPolicy: [],
+      /** @type {Array<LH.Crdp.Audits.DeprecationIssueDetails>} */
+      deprecations: [],
     };
 
     for (const issue of this._issues) {
       if (issue.details.mixedContentIssueDetails) {
         const issueDetails = issue.details.mixedContentIssueDetails;
-        const issueReqId = issueDetails.request && issueDetails.request.requestId;
+        const issueReqId = issueDetails.request?.requestId;
         // Duplicate issues can occur for the same request; only use the one with a matching networkRequest.
         if (issueReqId &&
           networkRecords.find(req => req.requestId === issueReqId)) {
@@ -83,7 +85,7 @@ class InspectorIssues extends FRGatherer {
       }
       if (issue.details.sameSiteCookieIssueDetails) {
         const issueDetails = issue.details.sameSiteCookieIssueDetails;
-        const issueReqId = issueDetails.request && issueDetails.request.requestId;
+        const issueReqId = issueDetails.request?.requestId;
         // Duplicate issues can occur for the same request; only use the one with a matching networkRequest.
         if (issueReqId &&
           networkRecords.find(req => req.requestId === issueReqId)) {
@@ -92,7 +94,7 @@ class InspectorIssues extends FRGatherer {
       }
       if (issue.details.blockedByResponseIssueDetails) {
         const issueDetails = issue.details.blockedByResponseIssueDetails;
-        const issueReqId = issueDetails.request && issueDetails.request.requestId;
+        const issueReqId = issueDetails.request?.requestId;
         // Duplicate issues can occur for the same request; only use the one with a matching networkRequest.
         if (issueReqId &&
           networkRecords.find(req => req.requestId === issueReqId)) {
@@ -104,6 +106,9 @@ class InspectorIssues extends FRGatherer {
       }
       if (issue.details.contentSecurityPolicyIssueDetails) {
         artifact.contentSecurityPolicy.push(issue.details.contentSecurityPolicyIssueDetails);
+      }
+      if (issue.details.deprecationIssueDetails) {
+        artifact.deprecations.push(issue.details.deprecationIssueDetails);
       }
     }
 

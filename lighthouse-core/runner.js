@@ -20,6 +20,7 @@ const URL = require('./lib/url-shim.js');
 const Sentry = require('./lib/sentry.js');
 const generateReport = require('../report/generator/report-generator.js').generateReport;
 const LHError = require('./lib/lh-error.js');
+const {version: lighthouseVersion} = require('../package.json');
 
 /** @typedef {import('./gather/connections/connection.js')} Connection */
 /** @typedef {import('./lib/arbitrary-equality-map.js')} ArbitraryEqualityMap */
@@ -48,7 +49,7 @@ class Runner {
       Sentry.captureBreadcrumb({
         message: 'Run started',
         category: 'lifecycle',
-        data: sentryContext && sentryContext.extra,
+        data: sentryContext?.extra,
       });
 
       // User can run -G solo, -A solo, or -GA together
@@ -112,11 +113,10 @@ class Runner {
       }
 
       // Entering: conclusion of the lighthouse result object
-      const lighthouseVersion = require('../package.json').version;
 
       // Use version from gathering stage.
       // If accessibility gatherer didn't run or errored, it won't be in credits.
-      const axeVersion = artifacts.Accessibility && artifacts.Accessibility.version;
+      const axeVersion = artifacts.Accessibility?.version;
       const credits = {
         'axe-core': axeVersion,
       };
@@ -132,7 +132,13 @@ class Runner {
 
       /** @type {LH.RawIcu<LH.Result>} */
       const i18nLhr = {
+        lighthouseVersion,
+        requestedUrl,
+        finalUrl: artifacts.URL.finalUrl,
+        fetchTime: artifacts.fetchTime,
         gatherMode: artifacts.GatherContext.gatherMode,
+        runtimeError: Runner.getArtifactRuntimeError(artifacts),
+        runWarnings: lighthouseRunWarnings,
         userAgent: artifacts.HostUserAgent,
         environment: {
           networkUserAgent: artifacts.NetworkUserAgent,
@@ -140,22 +146,16 @@ class Runner {
           benchmarkIndex: artifacts.BenchmarkIndex,
           credits,
         },
-        lighthouseVersion,
-        fetchTime: artifacts.fetchTime,
-        requestedUrl: requestedUrl,
-        finalUrl: artifacts.URL.finalUrl,
-        runWarnings: lighthouseRunWarnings,
-        runtimeError: Runner.getArtifactRuntimeError(artifacts),
         audits: auditResultsById,
         configSettings: settings,
         categories,
         categoryGroups: runOpts.config.groups || undefined,
+        stackPacks: stackPacks.getStackPacks(artifacts.Stacks),
         timing: this._getTiming(artifacts),
         i18n: {
           rendererFormattedStrings: format.getRendererFormattedStrings(settings.locale),
           icuMessagePaths: {},
         },
-        stackPacks: stackPacks.getStackPacks(artifacts.Stacks),
       };
 
       // Replace ICU message references with localized strings; save replaced paths in lhr.
@@ -213,7 +213,7 @@ class Runner {
       };
     }).sort((a, b) => a.startTime - b.startTime);
     const runnerEntry = timingEntries.find(e => e.name === 'lh:runner:run');
-    return {entries: timingEntries, total: runnerEntry && runnerEntry.duration || 0};
+    return {entries: timingEntries, total: runnerEntry?.duration || 0};
   }
 
   /**
@@ -367,7 +367,7 @@ class Runner {
           return narrowedArtifacts;
         }, /** @type {LH.Artifacts} */ ({}));
       const product = await audit.audit(narrowedArtifacts, auditContext);
-      runWarnings.push(...product.runWarnings || []);
+      runWarnings.push(...(product.runWarnings || []));
 
       auditResult = Audit.generateAuditResult(audit, product);
     } catch (err) {
