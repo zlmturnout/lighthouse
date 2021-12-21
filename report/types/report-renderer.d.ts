@@ -31,6 +31,12 @@ declare module Renderer {
     /** If defined, when the 'Save/Copy as HTML' items are clicked, this fn will be used instead of `documentElement.outerHTML`. */
     getStandaloneReportHTML?: () => string;
 
+    /** If defined, renderer will call this when printing is invoked instead of window.print() */
+    onPrintOverride?: (rootEl: HTMLElement) => Promise<void>;
+
+    /** If defined, renderer will call this rather than using a `<a download>.click()>` to trigger a JSON/HTML download. Blob will be either json or html. */
+    onSaveFileOverride?: (blob: Blob, lhr: LH.Result) => Promise<void>;
+
     /**
      * DOM element that will the overlay DOM should be a child of.
      * Between stacking contexts and z-index, the overlayParentEl should have a stacking/paint order high enough to cover all elements that the overlay should paint above.
