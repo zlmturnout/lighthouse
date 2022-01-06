@@ -7,6 +7,9 @@ Object {
       "path": "is-on-https",
     },
     Object {
+      "path": "redirects-http",
+    },
+    Object {
       "path": "service-worker",
     },
     Object {
@@ -741,6 +744,11 @@ Object {
         },
         Object {
           "group": "best-practices-trust-safety",
+          "id": "redirects-http",
+          "weight": 1,
+        },
+        Object {
+          "group": "best-practices-trust-safety",
           "id": "geolocation-on-start",
           "weight": 1,
         },
@@ -1152,6 +1160,11 @@ Object {
           "group": "pwa-optimized",
           "id": "service-worker",
           "weight": 1,
+        },
+        Object {
+          "group": "pwa-optimized",
+          "id": "redirects-http",
+          "weight": 2,
         },
         Object {
           "group": "pwa-optimized",

@@ -148,6 +148,7 @@ Disconnecting from browser...
 Cleaning origin data
 Analyzing and running audits...
 Auditing: Uses HTTPS
+Auditing: Redirects HTTP traffic to HTTPS
 Auditing: Registers a service worker that controls page and `start_url`
 Auditing: Has a `<meta name="viewport">` tag with `width` or `initial-scale`
 Computing artifact: ViewportMeta
@@ -509,6 +510,7 @@ pwa-cross-browser: manual
 pwa-each-page-has-url: manual
 pwa-page-transitions: manual
 redirects: flaky
+redirects-http: notApplicable
 render-blocking-resources: flaky
 resource-summary: informative
 robots-txt: notApplicable
@@ -555,7 +557,7 @@ viewport: fail
 viewport-ad-density: notApplicable
 visual-order-follows-dom: manual
 
-# of .lh-audit divs: 159
+# of .lh-audit divs: 161
 
 .lh-audit divs:
 accesskeys
@@ -675,6 +677,8 @@ pwa-cross-browser
 pwa-each-page-has-url
 pwa-page-transitions
 redirects
+redirects-http
+redirects-http
 render-blocking-resources
 resource-summary
 robots-txt

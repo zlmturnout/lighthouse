@@ -21,6 +21,7 @@ maskable-icon
 pwa-cross-browser
 pwa-each-page-has-url
 pwa-page-transitions
+redirects-http
 service-worker
 splash-screen
 themed-omnibox
