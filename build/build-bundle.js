@@ -107,7 +107,7 @@ async function build(entryPath, distPath, opts = {minify: true}) {
   }
 
   // Don't include locales in DevTools.
-  if (isDevtools(entryPath)) {
+  if (true || isDevtools(entryPath)) {
     shimsObj['./locales.js'] = 'export default {}';
   }
 
@@ -210,7 +210,7 @@ async function cli(argv) {
   // Take paths relative to cwd and build.
   const [entryPath, distPath] = argv.slice(2)
     .map(filePath => path.resolve(process.cwd(), filePath));
-  await build(entryPath, distPath);
+  await build(entryPath, distPath, {minify: false});
 }
 
 // Test if called from the CLI or as a module.
