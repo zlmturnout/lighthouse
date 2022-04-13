@@ -9,10 +9,14 @@
 
 import {Buffer} from 'buffer';
 
+import {Browser} from 'puppeteer/lib/esm/puppeteer/common/Browser';
+import {Connection as PptrConnection} from 'puppeteer/lib/esm/puppeteer/common/Connection';
+
 import lighthouse from '../../lighthouse-core/index.js';
 import LHError from '../../lighthouse-core/lib/lh-error.js';
 import preprocessor from '../../lighthouse-core/lib/proto-preprocessor.js';
 import assetSaver from '../../lighthouse-core/lib/asset-saver.js';
+import {navigation} from '../../lighthouse-core/fraggle-rock/api.js';
 
 import mobileConfig from '../../lighthouse-core/config/lr-mobile-config.js';
 import desktopConfig from '../../lighthouse-core/config/lr-desktop-config.js';
@@ -37,7 +41,7 @@ globalThis.Buffer = Buffer;
  * @param {Connection} connection
  * @param {string} url
  * @param {LH.Flags} flags Lighthouse flags
- * @param {{lrDevice?: 'desktop'|'mobile', categoryIDs?: Array<string>, logAssets: boolean, configOverride?: LH.Config.Json}} lrOpts Options coming from Lightrider
+ * @param {{lrDevice?: 'desktop'|'mobile', categoryIDs?: Array<string>, logAssets: boolean, configOverride?: LH.Config.Json, useFraggleRock?: boolean}} lrOpts Options coming from Lightrider
  * @return {Promise<string>}
  */
 export async function runLighthouseInLR(connection, url, flags, lrOpts) {
@@ -63,7 +67,53 @@ export async function runLighthouseInLR(connection, url, flags, lrOpts) {
   }
 
   try {
-    const runnerResult = await lighthouse(url, flags, config, connection);
+    let runnerResult;
+    if (lrOpts.useFraggleRock) {
+      await connection.connect();
+      const {targetInfo: mainTargetInfo} =
+        await connection.sendCommand('Target.getTargetInfo', undefined);
+      const {frameTree} = await connection.sendCommand('Page.getFrameTree', undefined);
+
+      const pptrConnection = new PptrConnection(
+        mainTargetInfo.url,
+        // @ts-expect-error Hack to access the WRS transport layer.
+        connection.channel_.root_.transport_
+      );
+
+      const browser = await Browser.create(
+        pptrConnection,
+        [] /* contextIds */,
+        false /* ignoreHTTPSErrors */,
+        undefined /* defaultViewport */,
+        undefined /* process */,
+        undefined /* closeCallback */,
+        (targetInfo) => {
+          if (targetInfo.type !== 'page' && targetInfo.type !== 'iframe') {
+            return false;
+          }
+          // TODO only connect to iframes that are related to the main target. This requires refactoring in Puppeteer: https://github.com/puppeteer/puppeteer/issues/3667.
+          return targetInfo.targetId === mainTargetInfo.targetId ||
+            targetInfo.openerId === mainTargetInfo.targetId ||
+            targetInfo.type === 'iframe';
+        }
+      );
+
+      const pages = await browser.pages();
+      const page = pages.find(p => p.mainFrame()._id === frameTree.frame.id);
+      if (!page) throw new Error('Could not find relevant puppeteer page');
+
+      /** @type {LH.Config.FRContext} */
+      const configContext = {
+        settingsOverrides: flags,
+        logLevel: flags.logLevel,
+        configPath: flags.configPath,
+      };
+      // @ts-expect-error Page has a slightly different type when importing the browser module directly.
+      runnerResult = await navigation(url, {page, config, configContext});
+    } else {
+      runnerResult = await lighthouse(url, flags, config, connection);
+    }
+
     if (!runnerResult) throw new Error('Lighthouse finished without a runnerResult');
 
     // pre process the LHR for proto
