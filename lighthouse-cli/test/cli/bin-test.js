@@ -65,7 +65,7 @@ beforeEach(async () => {
     view: false,
     verbose: false,
     quiet: false,
-    fraggleRock: false,
+    legacyNavigation: false,
     port: 0,
     hostname: '',
     // Command modes

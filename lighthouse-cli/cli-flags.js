@@ -124,10 +124,10 @@ function getFlags(manualArgv, options = {}) {
           type: 'boolean',
           describe: 'Pause after page load to wait for permission to continue the run, evaluate `continueLighthouseRun` in the console to continue.',
         },
-        'fraggle-rock': {
+        'legacy-navigation': {
           type: 'boolean',
           default: false,
-          describe: '[EXPERIMENTAL] Use the new Fraggle Rock navigation runner to gather results.',
+          describe: '[DEPRECATED] Use the legacy navigation runner to gather results.',
         },
         'additional-trace-categories': {
           type: 'string',
