@@ -34,6 +34,48 @@ const LR_PRESETS = {
 globalThis.Buffer = Buffer;
 
 /**
+ * @param {Connection} connection
+ * @return {Promise<LH.Puppeteer.Page>}
+ */
+async function getPageFromConnection(connection) {
+  await connection.connect();
+  const {targetInfo: mainTargetInfo} =
+    await connection.sendCommand('Target.getTargetInfo', undefined);
+  const {frameTree} = await connection.sendCommand('Page.getFrameTree', undefined);
+
+  const pptrConnection = new PptrConnection(
+    mainTargetInfo.url,
+    // @ts-expect-error Hack to access the WRS transport layer.
+    connection.channel_.root_.transport_
+  );
+
+  const browser = await Browser.create(
+    pptrConnection,
+    [] /* contextIds */,
+    false /* ignoreHTTPSErrors */,
+    undefined /* defaultViewport */,
+    undefined /* process */,
+    undefined /* closeCallback */,
+    (targetInfo) => {
+      if (targetInfo.type !== 'page' && targetInfo.type !== 'iframe') {
+        return false;
+      }
+      // TODO only connect to iframes that are related to the main target. This requires refactoring in Puppeteer: https://github.com/puppeteer/puppeteer/issues/3667.
+      return targetInfo.targetId === mainTargetInfo.targetId ||
+        targetInfo.openerId === mainTargetInfo.targetId ||
+        targetInfo.type === 'iframe';
+    }
+  );
+
+  const pages = await browser.pages();
+  const page = pages.find(p => p.mainFrame()._id === frameTree.frame.id);
+  if (!page) throw new Error('Could not find relevant puppeteer page');
+
+  // @ts-expect-error Page has a slightly different type when importing the browser module directly.
+  return page;
+}
+
+/**
  * Run lighthouse for connection and provide similar results as in CLI.
  *
  * If configOverride is provided, lrDevice and categoryIDs are ignored.
@@ -68,40 +110,7 @@ export async function runLighthouseInLR(connection, url, flags, lrOpts) {
   try {
     let runnerResult;
     if (lrOpts.useFraggleRock) {
-      await connection.connect();
-      const {targetInfo: mainTargetInfo} =
-        await connection.sendCommand('Target.getTargetInfo', undefined);
-      const {frameTree} = await connection.sendCommand('Page.getFrameTree', undefined);
-
-      const pptrConnection = new PptrConnection(
-        mainTargetInfo.url,
-        // @ts-expect-error Hack to access the WRS transport layer.
-        connection.channel_.root_.transport_
-      );
-
-      const browser = await Browser.create(
-        pptrConnection,
-        [] /* contextIds */,
-        false /* ignoreHTTPSErrors */,
-        undefined /* defaultViewport */,
-        undefined /* process */,
-        undefined /* closeCallback */,
-        (targetInfo) => {
-          if (targetInfo.type !== 'page' && targetInfo.type !== 'iframe') {
-            return false;
-          }
-          // TODO only connect to iframes that are related to the main target. This requires refactoring in Puppeteer: https://github.com/puppeteer/puppeteer/issues/3667.
-          return targetInfo.targetId === mainTargetInfo.targetId ||
-            targetInfo.openerId === mainTargetInfo.targetId ||
-            targetInfo.type === 'iframe';
-        }
-      );
-
-      const pages = await browser.pages();
-      const page = pages.find(p => p.mainFrame()._id === frameTree.frame.id);
-      if (!page) throw new Error('Could not find relevant puppeteer page');
-
-      // @ts-expect-error Page has a slightly different type when importing the browser module directly.
+      const page = await getPageFromConnection(connection);
       runnerResult = await lighthouse(url, flags, config, page);
     } else {
       runnerResult = await lighthouse.legacyNavigation(url, flags, config, connection);
