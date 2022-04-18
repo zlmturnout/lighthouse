@@ -9,8 +9,8 @@
 
 import {Buffer} from 'buffer';
 
-import {Browser} from 'puppeteer/lib/esm/puppeteer/common/Browser';
-import {Connection as PptrConnection} from 'puppeteer/lib/esm/puppeteer/common/Connection';
+import {Browser} from 'puppeteer-core/lib/esm/puppeteer/common/Browser';
+import {Connection as PptrConnection} from 'puppeteer-core/lib/esm/puppeteer/common/Connection';
 
 import lighthouse from '../../lighthouse-core/index.js';
 import LHError from '../../lighthouse-core/lib/lh-error.js';
