@@ -502,7 +502,7 @@ describe('Fraggle Rock Config Filtering', () => {
       });
     });
 
-    it('should filter out audits and artifacts not in the categories by default', () => {
+    it('should keep audits not in any category by default', () => {
       config = {
         ...config,
         audits: [
@@ -524,6 +524,7 @@ describe('Fraggle Rock Config Filtering', () => {
           {implementation: TimespanAudit},
           {implementation: NavigationAudit},
           {implementation: ManualAudit},
+          {implementation: NavigationOnlyAudit},
         ],
       });
     });
