@@ -50,7 +50,6 @@ declare module Config {
   interface FRConfig {
     settings: Settings;
     artifacts: AnyArtifactDefn[] | null;
-    navigation: NavigationDefn | null;
     audits: AuditDefn[] | null;
     categories: Record<string, Category> | null;
     groups: Record<string, Group> | null;
@@ -100,13 +99,6 @@ declare module Config {
     useThrottling?: boolean;
     /** The array of gatherers to run during the pass. */
     gatherers?: GathererJson[];
-  }
-
-  interface NavigationJson extends SharedPassNavigationJson {
-    /** Whether throttling settings should be skipped for the pass. */
-    disableThrottling?: boolean;
-    /** Whether storage clearing (service workers, cache storage) should be skipped for the pass. A run-wide setting of `true` takes precedence over this value. */
-    disableStorageReset?: boolean;
   }
 
   interface ArtifactJson {
@@ -160,13 +152,13 @@ declare module Config {
     relevantAudits?: string[];
   }
 
-  type Settings = ConfigSettings;
+  type Settings = ConfigSettings & Required<Omit<SharedPassNavigationJson, 'blockedUrlPatterns'|'loadFailureMode'>>;
 
   interface Pass extends Required<PassJson> {
     gatherers: GathererDefn[];
   }
 
-  type NavigationDefn = Required<NavigationJson>;
+  type NavigationDefn = Required<SharedPassNavigationJson>;
 
   interface ArtifactDefn<TDependencies extends Gatherer.DependencyKey = Gatherer.DependencyKey> {
     id: string;

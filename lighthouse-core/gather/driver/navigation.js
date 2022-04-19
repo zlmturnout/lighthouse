@@ -40,7 +40,7 @@ const DEFAULT_NETWORK_QUIET_THRESHOLD = 5000;
 // Controls how long to wait between longtasks before determining the CPU is idle, off by default
 const DEFAULT_CPU_QUIET_THRESHOLD = 0;
 
-/** @typedef {{waitUntil: Array<'fcp'|'load'|'navigated'>} & LH.Config.SharedPassNavigationJson & Partial<Pick<LH.Config.Settings, 'maxWaitForFcp'|'maxWaitForLoad'|'debugNavigation'>>} NavigationOptions */
+/** @typedef {{waitUntil: Array<'fcp'|'load'|'navigated'>} & Partial<LH.Config.Settings>} NavigationOptions */
 
 /** @param {NavigationOptions} options */
 function resolveWaitForFullyLoadedOptions(options) {

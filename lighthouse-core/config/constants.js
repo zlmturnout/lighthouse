@@ -119,6 +119,14 @@ const defaultSettings = {
   onlyAudits: null,
   onlyCategories: null,
   skipAudits: null,
+
+  // The following settings are from SharedPassNavigationJson
+  // They are historically defined on a legacy pass but have been moved here as part of FR.
+  pauseAfterFcpMs: 1000,
+  pauseAfterLoadMs: 1000,
+  networkQuietThresholdMs: 1000,
+  cpuQuietThresholdMs: 1000,
+  blankPage: 'about:blank',
 };
 
 /** @type {LH.Config.Pass} */
@@ -136,19 +144,6 @@ const defaultPassConfig = {
   gatherers: [],
 };
 
-/** @type {Required<LH.Config.NavigationJson>} */
-const defaultNavigationConfig = {
-  loadFailureMode: 'fatal',
-  disableThrottling: false,
-  disableStorageReset: false,
-  pauseAfterFcpMs: 0,
-  pauseAfterLoadMs: 0,
-  networkQuietThresholdMs: 0,
-  cpuQuietThresholdMs: 0,
-  blockedUrlPatterns: [],
-  blankPage: 'about:blank',
-};
-
 const nonSimulatedPassConfigOverrides = {
   pauseAfterFcpMs: 5250,
   pauseAfterLoadMs: 5250,
@@ -162,6 +157,5 @@ module.exports = {
   userAgents,
   defaultSettings,
   defaultPassConfig,
-  defaultNavigationConfig,
   nonSimulatedPassConfigOverrides,
 };

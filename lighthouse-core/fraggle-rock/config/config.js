@@ -9,7 +9,7 @@ const path = require('path');
 const log = require('lighthouse-logger');
 const Runner = require('../../runner.js');
 const defaultConfig = require('./default-config.js');
-const {defaultNavigationConfig, nonSimulatedPassConfigOverrides} = require('../../config/constants.js'); // eslint-disable-line max-len
+const {nonSimulatedPassConfigOverrides} = require('../../config/constants.js'); // eslint-disable-line max-len
 const {
   isFRGathererDefn,
   throwInvalidDependencyOrder,
@@ -172,65 +172,33 @@ function overrideSettingsForGatherMode(settings, context) {
 /**
  * Overrides the quiet windows when throttlingMethod requires observation.
  *
- * @param {LH.Config.NavigationDefn} navigation
  * @param {LH.Config.Settings} settings
  */
-function overrideNavigationThrottlingWindows(navigation, settings) {
-  if (navigation.disableThrottling) return;
+function overrideSettingsThrottlingWindows(settings) {
   if (settings.throttlingMethod === 'simulate') return;
 
-  navigation.cpuQuietThresholdMs = Math.max(
-    navigation.cpuQuietThresholdMs || 0,
+  settings.cpuQuietThresholdMs = Math.max(
+    settings.cpuQuietThresholdMs || 0,
     nonSimulatedPassConfigOverrides.cpuQuietThresholdMs
   );
-  navigation.networkQuietThresholdMs = Math.max(
-    navigation.networkQuietThresholdMs || 0,
+  settings.networkQuietThresholdMs = Math.max(
+    settings.networkQuietThresholdMs || 0,
     nonSimulatedPassConfigOverrides.networkQuietThresholdMs
   );
-  navigation.pauseAfterFcpMs = Math.max(
-    navigation.pauseAfterFcpMs || 0,
+  settings.pauseAfterFcpMs = Math.max(
+    settings.pauseAfterFcpMs || 0,
     nonSimulatedPassConfigOverrides.pauseAfterFcpMs
   );
-  navigation.pauseAfterLoadMs = Math.max(
-    navigation.pauseAfterLoadMs || 0,
+  settings.pauseAfterLoadMs = Math.max(
+    settings.pauseAfterLoadMs || 0,
     nonSimulatedPassConfigOverrides.pauseAfterLoadMs
   );
 }
 
 /**
- * @param {LH.Config.PassJson[]|null|undefined} passes
- * @param {LH.Config.Settings} settings
- * @return {LH.Config.NavigationDefn | null}
- */
-function resolveNavigationDefnFromPasses(passes, settings) {
-  if (!passes) return null;
-
-  const status = {msg: 'Resolve navigation definition', id: 'lh:config:resolveNavigationDefn'};
-  log.time(status, 'verbose');
-
-  const defaultPass = passes.find(pass => pass.passName === 'defaultPass') || passes[0];
-  if (!defaultPass) return null;
-
-  /** @type {LH.Config.NavigationDefn} */
-  const resolvedNavigation = {
-    ...defaultNavigationConfig,
-    ...defaultPass,
-  };
-
-  if (defaultPass.useThrottling !== undefined) {
-    resolvedNavigation.disableThrottling = !defaultPass.useThrottling;
-  }
-
-  overrideNavigationThrottlingWindows(resolvedNavigation, settings);
-
-  log.timeEnd(status);
-  return resolvedNavigation;
-}
-
-/**
  * @param {LH.Config.Json|undefined} configJSON
  * @param {ConfigContext} context
- * @return {{config: LH.Config.FRConfig, warnings: string[]}}
+ * @return {{config: LH.Config.FRConfig}}
  */
 function initializeConfig(configJSON, context) {
   const status = {msg: 'Initialize config', id: 'lh:config'};
@@ -245,25 +213,24 @@ function initializeConfig(configJSON, context) {
   overrideSettingsForGatherMode(settings, context);
 
   const artifacts = resolveArtifactsToDefns(configWorkingCopy.artifacts, configDir);
-  const navigation = resolveNavigationDefnFromPasses(configWorkingCopy.passes, settings);
+  overrideSettingsThrottlingWindows(settings);
 
   /** @type {LH.Config.FRConfig} */
   let config = {
     artifacts,
-    navigation,
     audits: resolveAuditsToDefns(configWorkingCopy.audits, configDir),
     categories: configWorkingCopy.categories || null,
     groups: configWorkingCopy.groups || null,
     settings,
   };
 
-  const {warnings} = assertValidConfig(config);
+  assertValidConfig(config);
 
   config = filterConfigByGatherMode(config, context.gatherMode);
   config = filterConfigByExplicitFilters(config, settings);
 
   log.timeEnd(status);
-  return {config, warnings};
+  return {config};
 }
 
 module.exports = {resolveWorkingCopy, initializeConfig};

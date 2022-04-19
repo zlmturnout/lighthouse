@@ -79,43 +79,6 @@ function assertValidFRGatherer(gathererDefn) {
 }
 
 /**
- * Throws an error if the provided object does not implement the required navigations interface.
- * @param {LH.Config.FRConfig['navigations']} navigationsDefn
- * @return {{warnings: string[]}}
- */
-function assertValidFRNavigations(navigationsDefn) {
-  if (!navigationsDefn || !navigationsDefn.length) return {warnings: []};
-
-  /** @type {string[]} */
-  const warnings = [];
-
-  // Assert that the first navigation has loadFailureMode fatal.
-  const firstNavigation = navigationsDefn[0];
-  if (firstNavigation.loadFailureMode !== 'fatal') {
-    const currentMode = firstNavigation.loadFailureMode;
-    const warning = [
-      `"${firstNavigation.id}" is the first navigation but had a failure mode of ${currentMode}.`,
-      `The first navigation will always be treated as loadFailureMode=fatal.`,
-    ].join(' ');
-
-    warnings.push(warning);
-    firstNavigation.loadFailureMode = 'fatal';
-  }
-
-  // Assert that navigations have unique IDs.
-  const navigationIds = navigationsDefn.map(navigation => navigation.id);
-  const duplicateId = navigationIds.find(
-    (id, i) => navigationIds.slice(i + 1).some(other => id === other)
-  );
-
-  if (duplicateId) {
-    throw new Error(`Navigation must have unique identifiers, but "${duplicateId}" was repeated.`);
-  }
-
-  return {warnings};
-}
-
-/**
  * Throws an error if the provided object does not implement the required properties of an audit
  * definition.
  * @param {LH.Config.AuditDefn} auditDefinition
@@ -227,33 +190,9 @@ function assertValidSettings(settings) {
 }
 
 /**
- * Asserts that artifacts are in a valid dependency order that can be computed.
- *
- * @param {Array<LH.Config.NavigationDefn>} navigations
- */
-function assertArtifactTopologicalOrder(navigations) {
-  const availableArtifacts = new Set();
-
-  for (const navigation of navigations) {
-    for (const artifact of navigation.artifacts) {
-      availableArtifacts.add(artifact.id);
-      if (!artifact.dependencies) continue;
-
-      for (const [dependencyKey, {id: dependencyId}] of Object.entries(artifact.dependencies)) {
-        if (availableArtifacts.has(dependencyId)) continue;
-        throwInvalidDependencyOrder(artifact.id, dependencyKey);
-      }
-    }
-  }
-}
-
-/**
  * @param {LH.Config.FRConfig} config
- * @return {{warnings: string[]}}
  */
 function assertValidConfig(config) {
-  const {warnings} = assertValidFRNavigations(config.navigations);
-
   for (const artifactDefn of config.artifacts || []) {
     assertValidFRGatherer(artifactDefn.gatherer);
   }
@@ -264,7 +203,6 @@ function assertValidConfig(config) {
 
   assertValidCategories(config.categories, config.audits, config.groups);
   assertValidSettings(config.settings);
-  return {warnings};
 }
 
 /**
@@ -302,11 +240,9 @@ module.exports = {
   isValidArtifactDependency,
   assertValidPluginName,
   assertValidFRGatherer,
-  assertValidFRNavigations,
   assertValidAudit,
   assertValidCategories,
   assertValidSettings,
-  assertArtifactTopologicalOrder,
   assertValidConfig,
   throwInvalidDependencyOrder,
   throwInvalidArtifactDependency,
