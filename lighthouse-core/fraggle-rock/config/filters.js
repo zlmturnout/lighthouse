@@ -39,12 +39,13 @@ const filterResistantArtifactIds = ['HostUserAgent', 'HostFormFactor', 'Stacks',
  * categories.
  *
  * @param {LH.Config.FRConfig['categories']} allCategories
- * @param {string[]} onlyCategories
+ * @param {string[] | undefined} onlyCategories
  * @return {Set<string>}
  */
 function getAuditIdsInCategories(allCategories, onlyCategories) {
   if (!allCategories) return new Set();
 
+  onlyCategories = onlyCategories || Object.keys(allCategories);
   const categories = onlyCategories.map(categoryId => allCategories[categoryId]);
   const auditRefs = categories.flatMap(category => category?.auditRefs || []);
   return new Set(auditRefs.map(auditRef => auditRef.id));
@@ -287,11 +288,13 @@ function filterConfigByExplicitFilters(config, filters) {
 
   warnOnUnknownOnlyCategories(config.categories, onlyCategories);
 
-  let baseAuditIds = new Set(config.audits?.map(audit => audit.implementation.meta.id));
+  let baseAuditIds = getAuditIdsInCategories(config.categories, undefined);
   if (onlyCategories) {
     baseAuditIds = getAuditIdsInCategories(config.categories, onlyCategories);
   } else if (onlyAudits) {
     baseAuditIds = new Set();
+  } else if (!Object.keys(config.categories || {}).length) {
+    baseAuditIds = new Set(config.audits?.map(audit => audit.implementation.meta.id));
   }
 
   const auditIdsToKeep = new Set(
