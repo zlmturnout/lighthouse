@@ -188,7 +188,7 @@ async function _computeNavigationResult(
 
     /** @type {Partial<LH.GathererArtifacts>} */
     const artifacts = {};
-    const pageLoadErrorId = `pageLoadError-${navigationContext.navigation.id}`;
+    const pageLoadErrorId = 'pageLoadError';
     if (debugData.devtoolsLog) artifacts.devtoolsLogs = {[pageLoadErrorId]: debugData.devtoolsLog};
     if (debugData.trace) artifacts.traces = {[pageLoadErrorId]: debugData.trace};
 
@@ -221,7 +221,7 @@ async function _navigation(navigationContext) {
     gatherMode: /** @type {const} */ ('navigation'),
     driver: navigationContext.driver,
     computedCache: navigationContext.computedCache,
-    artifactDefinitions: navigationContext.navigation.artifacts,
+    artifactDefinitions: navigationContext.config.artifacts || [],
     artifactState,
     baseArtifacts: navigationContext.baseArtifacts,
     settings: navigationContext.config.settings,
@@ -256,37 +256,32 @@ async function _navigation(navigationContext) {
  * @return {Promise<{artifacts: Partial<LH.FRArtifacts & LH.FRBaseArtifacts>}>}
  */
 async function _navigations({driver, config, requestor, baseArtifacts, computedCache, options}) {
-  if (!config.navigations) throw new Error('No navigations configured');
+  if (!config.navigation) throw new Error('No navigation configured');
 
   /** @type {Partial<LH.FRArtifacts & LH.FRBaseArtifacts>} */
   const artifacts = {};
   /** @type {Array<LH.IcuMessage>} */
   const LighthouseRunWarnings = [];
 
-  for (const navigation of config.navigations) {
-    const navigationContext = {
-      driver,
-      navigation,
-      requestor,
-      config,
-      baseArtifacts,
-      computedCache,
-      options,
-    };
+  const navigationContext = {
+    driver,
+    navigation: config.navigation,
+    requestor,
+    config,
+    baseArtifacts,
+    computedCache,
+    options,
+  };
 
-    let shouldHaltNavigations = false;
-    const navigationResult = await _navigation(navigationContext);
-    if (navigation.loadFailureMode === 'fatal') {
-      if (navigationResult.pageLoadError) {
-        artifacts.PageLoadError = navigationResult.pageLoadError;
-        shouldHaltNavigations = true;
-      }
+  const navigationResult = await _navigation(navigationContext);
+  if (config.navigation.loadFailureMode === 'fatal') {
+    if (navigationResult.pageLoadError) {
+      artifacts.PageLoadError = navigationResult.pageLoadError;
     }
-
-    LighthouseRunWarnings.push(...navigationResult.warnings);
-    Object.assign(artifacts, navigationResult.artifacts);
-    if (shouldHaltNavigations) break;
   }
+
+  LighthouseRunWarnings.push(...navigationResult.warnings);
+  Object.assign(artifacts, navigationResult.artifacts);
 
   return {artifacts: {...artifacts, LighthouseRunWarnings}};
 }

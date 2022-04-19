@@ -28,7 +28,6 @@ declare module Config {
 
     // Fraggle Rock Only
     artifacts?: ArtifactJson[] | null;
-    navigations?: NavigationJson[] | null;
 
     // Legacy Only
     passes?: PassJson[] | null;
@@ -51,7 +50,7 @@ declare module Config {
   interface FRConfig {
     settings: Settings;
     artifacts: AnyArtifactDefn[] | null;
-    navigations: NavigationDefn[] | null;
+    navigation: NavigationDefn | null;
     audits: AuditDefn[] | null;
     categories: Record<string, Category> | null;
     groups: Record<string, Group> | null;
@@ -104,14 +103,10 @@ declare module Config {
   }
 
   interface NavigationJson extends SharedPassNavigationJson {
-    /** The identifier for the navigation. Config extension will deduplicate navigations with the same id. */
-    id: string;
     /** Whether throttling settings should be skipped for the pass. */
     disableThrottling?: boolean;
     /** Whether storage clearing (service workers, cache storage) should be skipped for the pass. A run-wide setting of `true` takes precedence over this value. */
     disableStorageReset?: boolean;
-    /** The array of artifacts to collect during the navigation. */
-    artifacts?: Array<string>;
   }
 
   interface ArtifactJson {
@@ -171,9 +166,7 @@ declare module Config {
     gatherers: GathererDefn[];
   }
 
-  interface NavigationDefn extends Omit<Required<NavigationJson>, 'artifacts'> {
-    artifacts: AnyArtifactDefn[];
-  }
+  type NavigationDefn = Required<NavigationJson>;
 
   interface ArtifactDefn<TDependencies extends Gatherer.DependencyKey = Gatherer.DependencyKey> {
     id: string;

@@ -15,7 +15,6 @@ const {
   throwInvalidDependencyOrder,
   isValidArtifactDependency,
   throwInvalidArtifactDependency,
-  assertArtifactTopologicalOrder,
   assertValidConfig,
 } = require('./validation.js');
 const {filterConfigByGatherMode, filterConfigByExplicitFilters} = require('./filters.js');
@@ -70,7 +69,7 @@ function resolveExtensions(configJSON) {
     throw new Error('`lighthouse:default` is the only valid extension method.');
   }
 
-  const {artifacts, navigations, ...extensionJSON} = configJSON;
+  const {artifacts, ...extensionJSON} = configJSON;
   const defaultClone = deepCloneConfigJson(defaultConfig);
   const mergedConfig = mergeConfigFragment(defaultClone, extensionJSON);
 
@@ -78,11 +77,6 @@ function resolveExtensions(configJSON) {
     defaultClone.artifacts,
     artifacts,
     artifact => artifact.id
-  );
-  mergedConfig.navigations = mergeConfigFragmentArrayByKey(
-    defaultClone.navigations,
-    navigations,
-    navigation => navigation.id
   );
 
   return mergedConfig;
@@ -204,39 +198,33 @@ function overrideNavigationThrottlingWindows(navigation, settings) {
 }
 
 /**
- *
- * @param {LH.Config.NavigationJson[]|null|undefined} navigations
- * @param {LH.Config.AnyArtifactDefn[]|null|undefined} artifactDefns
+ * @param {LH.Config.PassJson[]|null|undefined} passes
  * @param {LH.Config.Settings} settings
- * @return {LH.Config.NavigationDefn[] | null}
+ * @return {LH.Config.NavigationDefn | null}
  */
-function resolveNavigationsToDefns(navigations, artifactDefns, settings) {
-  if (!navigations) return null;
-  if (!artifactDefns) throw new Error('Cannot use navigations without defining artifacts');
+function resolveNavigationDefnFromPasses(passes, settings) {
+  if (!passes) return null;
 
-  const status = {msg: 'Resolve navigation definitions', id: 'lh:config:resolveNavigationsToDefns'};
+  const status = {msg: 'Resolve navigation definition', id: 'lh:config:resolveNavigationDefn'};
   log.time(status, 'verbose');
 
-  const artifactsById = new Map(artifactDefns.map(defn => [defn.id, defn]));
+  const defaultPass = passes.find(pass => pass.passName === 'defaultPass') || passes[0];
+  if (!defaultPass) return null;
 
-  const navigationDefns = navigations.map(navigation => {
-    const navigationWithDefaults = {...defaultNavigationConfig, ...navigation};
-    const navId = navigationWithDefaults.id;
-    const artifacts = navigationWithDefaults.artifacts.map(id => {
-      const artifact = artifactsById.get(id);
-      if (!artifact) throw new Error(`Unrecognized artifact "${id}" in navigation "${navId}"`);
-      return artifact;
-    });
+  /** @type {LH.Config.NavigationDefn} */
+  const resolvedNavigation = {
+    ...defaultNavigationConfig,
+    ...defaultPass,
+  };
 
-    const resolvedNavigation = {...navigationWithDefaults, artifacts};
-    overrideNavigationThrottlingWindows(resolvedNavigation, settings);
-    return resolvedNavigation;
-  });
+  if (defaultPass.useThrottling !== undefined) {
+    resolvedNavigation.disableThrottling = !defaultPass.useThrottling;
+  }
 
-  assertArtifactTopologicalOrder(navigationDefns);
+  overrideNavigationThrottlingWindows(resolvedNavigation, settings);
 
   log.timeEnd(status);
-  return navigationDefns;
+  return resolvedNavigation;
 }
 
 /**
@@ -257,12 +245,12 @@ function initializeConfig(configJSON, context) {
   overrideSettingsForGatherMode(settings, context);
 
   const artifacts = resolveArtifactsToDefns(configWorkingCopy.artifacts, configDir);
-  const navigations = resolveNavigationsToDefns(configWorkingCopy.navigations, artifacts, settings);
+  const navigation = resolveNavigationDefnFromPasses(configWorkingCopy.passes, settings);
 
   /** @type {LH.Config.FRConfig} */
   let config = {
     artifacts,
-    navigations,
+    navigation,
     audits: resolveAuditsToDefns(configWorkingCopy.audits, configDir),
     categories: configWorkingCopy.categories || null,
     groups: configWorkingCopy.groups || null,

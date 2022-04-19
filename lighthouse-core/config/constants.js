@@ -138,7 +138,6 @@ const defaultPassConfig = {
 
 /** @type {Required<LH.Config.NavigationJson>} */
 const defaultNavigationConfig = {
-  id: 'default',
   loadFailureMode: 'fatal',
   disableThrottling: false,
   disableStorageReset: false,
@@ -148,7 +147,6 @@ const defaultNavigationConfig = {
   cpuQuietThresholdMs: 0,
   blockedUrlPatterns: [],
   blankPage: 'about:blank',
-  artifacts: [],
 };
 
 const nonSimulatedPassConfigOverrides = {
