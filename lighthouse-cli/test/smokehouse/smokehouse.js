@@ -119,15 +119,36 @@ function purpleify(str) {
 }
 
 /**
+ * @param {LH.Config.Json=} configJson
+ * @return {LH.Config.Json|undefined}
+ */
+function convertToFraggleRockConfig(configJson) {
+  if (!configJson) return configJson;
+  if (!configJson.passes) return configJson;
+
+  const settings = {...configJson.settings, ...configJson.passes[0]};
+
+  return {
+    ...configJson,
+    settings,
+  };
+}
+
+/**
  * Run Lighthouse in the selected runner.
  * @param {Smokehouse.TestDfn} smokeTestDefn
  * @param {{isDebug?: boolean, useFraggleRock?: boolean, retries: number, lighthouseRunner: Smokehouse.LighthouseRunner, takeNetworkRequestUrls?: () => string[]}} testOptions
  * @return {Promise<SmokehouseResult>}
  */
 async function runSmokeTest(smokeTestDefn, testOptions) {
-  const {id, config: configJson, expectations} = smokeTestDefn;
+  const {id, expectations} = smokeTestDefn;
   const {lighthouseRunner, retries, isDebug, useFraggleRock, takeNetworkRequestUrls} = testOptions;
   const requestedUrl = expectations.lhr.requestedUrl;
+
+  let configJson = smokeTestDefn.config;
+  if (useFraggleRock) {
+    configJson = convertToFraggleRockConfig(configJson);
+  }
 
   console.log(`${purpleify(id)} smoketest starting…`);
 

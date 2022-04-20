@@ -42,20 +42,6 @@ async function runLighthouse(url, configJson, testRunnerOptions = {}) {
 }
 
 /**
- * @param {LH.Config.Json=} configJson
- * @return {LH.Config.Json|undefined}
- */
-function convertToFraggleRockConfig(configJson) {
-  if (!configJson) return configJson;
-  if (!configJson.passes) return configJson;
-
-  return {
-    ...configJson,
-    navigations: configJson.passes.map(pass => ({...pass, id: pass.passName})),
-  };
-}
-
-/**
  * Internal runner.
  * @param {string} url
  * @param {string} tmpPath
@@ -83,7 +69,6 @@ async function internalRun(url, tmpPath, configJson, options) {
 
   if (useFraggleRock) {
     args.push('--fraggle-rock');
-    configJson = convertToFraggleRockConfig(configJson);
   }
 
   // Config can be optionally provided.
