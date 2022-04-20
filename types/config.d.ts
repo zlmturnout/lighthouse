@@ -152,6 +152,9 @@ declare module Config {
     relevantAudits?: string[];
   }
 
+  // Omit `blockedUrlPatterns` because it is already on `ConfigSettings`.
+  // Omit `loadFailureMode` because the first pass always has failure mode "fatal".
+  // TODO: Add the selected properties directly to `ConfigSettings`.
   type Settings = ConfigSettings & Required<Omit<SharedPassNavigationJson, 'blockedUrlPatterns'|'loadFailureMode'>>;
 
   interface Pass extends Required<PassJson> {
