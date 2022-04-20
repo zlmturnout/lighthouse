@@ -3692,7 +3692,12 @@
           "onlyCategories": null,
           "skipAudits": [
             "uses-http2"
-          ]
+          ],
+          "pauseAfterFcpMs": 1000,
+          "pauseAfterLoadMs": 1000,
+          "networkQuietThresholdMs": 1000,
+          "cpuQuietThresholdMs": 1000,
+          "blankPage": "about:blank"
         },
         "categories": {
           "performance": {
@@ -9120,7 +9125,12 @@
           "onlyCategories": null,
           "skipAudits": [
             "uses-http2"
-          ]
+          ],
+          "pauseAfterFcpMs": 1000,
+          "pauseAfterLoadMs": 1000,
+          "networkQuietThresholdMs": 1000,
+          "cpuQuietThresholdMs": 1000,
+          "blankPage": "about:blank"
         },
         "categories": {
           "performance": {
@@ -12325,7 +12335,12 @@
           "onlyCategories": null,
           "skipAudits": [
             "uses-http2"
-          ]
+          ],
+          "pauseAfterFcpMs": 1000,
+          "pauseAfterLoadMs": 1000,
+          "networkQuietThresholdMs": 1000,
+          "cpuQuietThresholdMs": 1000,
+          "blankPage": "about:blank"
         },
         "categories": {
           "performance": {
@@ -17828,7 +17843,12 @@
           "onlyCategories": null,
           "skipAudits": [
             "uses-http2"
-          ]
+          ],
+          "pauseAfterFcpMs": 1000,
+          "pauseAfterLoadMs": 1000,
+          "networkQuietThresholdMs": 1000,
+          "cpuQuietThresholdMs": 1000,
+          "blankPage": "about:blank"
         },
         "categories": {
           "performance": {
