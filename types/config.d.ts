@@ -30,6 +30,7 @@ declare module Config {
     artifacts?: ArtifactJson[] | null;
 
     // Legacy Only
+    /** @deprecated Only legacy navigations can configure multiple passes. Configure properties on `settings` instead */
     passes?: PassJson[] | null;
   }
 
