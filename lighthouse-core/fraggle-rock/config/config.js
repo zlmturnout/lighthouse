@@ -211,9 +211,9 @@ function initializeConfig(configJSON, context) {
 
   const settings = resolveSettings(configWorkingCopy.settings || {}, context.settingsOverrides);
   overrideSettingsForGatherMode(settings, context);
+  overrideSettingsThrottlingWindows(settings);
 
   const artifacts = resolveArtifactsToDefns(configWorkingCopy.artifacts, configDir);
-  overrideSettingsThrottlingWindows(settings);
 
   /** @type {LH.Config.FRConfig} */
   let config = {
