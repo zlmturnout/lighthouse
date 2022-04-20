@@ -94,18 +94,14 @@ async function resetStorageForUrl(session, url) {
  *
  * @param {LH.Gatherer.FRProtocolSession} session
  * @param {LH.Config.Settings} settings
- * @param {{disableThrottling?: boolean, blockedUrlPatterns?: string[]}=} options
+ * @param {{disableThrottling?: boolean, blockedUrlPatterns?: string[]}} [options]
  */
 async function prepareThrottlingAndNetwork(session, settings, options) {
   const status = {msg: 'Preparing network conditions', id: `lh:gather:prepareThrottlingAndNetwork`};
   log.time(status);
 
-  const shouldThrottle = !options?.disableThrottling && settings.throttlingMethod !== 'provided';
-  if (shouldThrottle) {
-    await emulation.throttle(session, settings);
-  } else {
-    await emulation.clearThrottling(session);
-  }
+  if (options?.disableThrottling) await emulation.clearThrottling(session);
+  else await emulation.throttle(session, settings);
 
   // Set request blocking before any network activity.
   // No "clearing" is done at the end of the recording since Network.setBlockedURLs([]) will unset all if
@@ -150,10 +146,7 @@ async function prepareTargetForTimespanMode(driver, settings) {
   log.time(status);
 
   await prepareDeviceEmulationAndAsyncStacks(driver, settings);
-  await prepareThrottlingAndNetwork(driver.defaultSession, settings, {
-    disableThrottling: false,
-    blockedUrlPatterns: undefined,
-  });
+  await prepareThrottlingAndNetwork(driver.defaultSession, settings);
 
   log.timeEnd(status);
 }
