@@ -173,15 +173,21 @@ describe('NavigationRunner', () => {
       await expect(run()).rejects.toBeTruthy();
     });
 
-    it('should navigate as many times as there are navigations', async () => {
+    it('should ignore passes and only navigate once', async () => {
       config = initializeConfig(
         {
           ...config,
-          navigations: [
-            {id: 'default', artifacts: ['FontSize']},
-            {id: 'second', artifacts: ['ConsoleMessages']},
-            {id: 'third', artifacts: ['ViewportDimensions']},
-            {id: 'fourth', artifacts: ['AnchorElements']},
+          artifacts: [
+            {id: 'FontSize', gatherer: 'seo/font-size'},
+            {id: 'ConsoleMessages', gatherer: 'console-messages'},
+            {id: 'ViewportDimensions', gatherer: 'viewport-dimensions'},
+            {id: 'AnchorElements', gatherer: 'anchor-elements'},
+          ],
+          passes: [
+            {passName: 'default', gatherers: ['FontSize']},
+            {passName: 'second', gatherers: ['ConsoleMessages']},
+            {passName: 'third', gatherers: ['ViewportDimensions']},
+            {passName: 'fourth', gatherers: ['AnchorElements']},
           ],
         },
         {gatherMode: 'navigation'}
@@ -190,7 +196,7 @@ describe('NavigationRunner', () => {
       await run();
       const navigations = mocks.navigationMock.gotoURL.mock.calls;
       const pageNavigations = navigations.filter(call => call[1] === requestedUrl);
-      expect(pageNavigations).toHaveLength(4);
+      expect(pageNavigations).toHaveLength(1);
     });
 
     it('should backfill requested URL using a callback requestor', async () => {
@@ -199,8 +205,9 @@ describe('NavigationRunner', () => {
       config = initializeConfig(
         {
           ...config,
-          navigations: [
-            {id: 'default', artifacts: ['FontSize']},
+          artifacts: [
+            {id: 'FontSize', gatherer: 'seo/font-size'},
+            {id: 'MetaElements', gatherer: 'meta-elements'},
           ],
         },
         {gatherMode: 'navigation'}
@@ -221,33 +228,13 @@ describe('NavigationRunner', () => {
       });
     });
 
-    it('should merge artifacts between navigations', async () => {
-      config = initializeConfig(
-        {
-          ...config,
-          navigations: [
-            {id: 'default', artifacts: ['FontSize']},
-            {id: 'second', artifacts: ['ConsoleMessages']},
-          ],
-        },
-        {gatherMode: 'navigation'}
-      ).config;
-
-      // Both gatherers will error in these test conditions, but artifact errors
-      // will be merged into single `artifacts` object.
-      const {artifacts} = await run();
-      const artifactIds = Object.keys(artifacts);
-      expect(artifactIds).toContain('FontSize');
-      expect(artifactIds).toContain('ConsoleMessages');
-    });
-
     it('should retain PageLoadError and associated warnings', async () => {
       config = initializeConfig(
         {
           ...config,
-          navigations: [
-            {id: 'default', loadFailureMode: 'fatal', artifacts: ['FontSize']},
-            {id: 'second', artifacts: ['ConsoleMessages']},
+          artifacts: [
+            {id: 'FontSize', gatherer: 'seo/font-size'},
+            {id: 'MetaElements', gatherer: 'meta-elements'},
           ],
         },
         {gatherMode: 'navigation'}
