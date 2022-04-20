@@ -161,7 +161,7 @@ declare module Config {
     gatherers: GathererDefn[];
   }
 
-  // TODO: Remove this type.
+  // TODO: Remove this type. It's only used in test files.
   type NavigationDefn = Required<SharedPassNavigationJson>;
 
   interface ArtifactDefn<TDependencies extends Gatherer.DependencyKey = Gatherer.DependencyKey> {

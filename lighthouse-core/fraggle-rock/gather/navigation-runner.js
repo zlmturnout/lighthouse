@@ -247,6 +247,7 @@ async function _navigation(navigationContext) {
 }
 
 /**
+ * TODO: Remove/rename this function, it only makes sense when there are multiple config navigations.
  * @param {{driver: Driver, config: LH.Config.FRConfig, requestor: LH.NavigationRequestor; baseArtifacts: LH.FRBaseArtifacts, computedCache: NavigationContext['computedCache'], options?: InternalOptions}} args
  * @return {Promise<{artifacts: Partial<LH.FRArtifacts & LH.FRBaseArtifacts>}>}
  */
