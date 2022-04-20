@@ -94,19 +94,19 @@ async function resetStorageForUrl(session, url) {
  *
  * @param {LH.Gatherer.FRProtocolSession} session
  * @param {LH.Config.Settings} settings
- * @param {{disableThrottling?: boolean, blockedUrlPatterns?: string[]}} [options]
+ * @param {{disableThrottling: boolean, blockedUrlPatterns?: string[]}} options
  */
 async function prepareThrottlingAndNetwork(session, settings, options) {
   const status = {msg: 'Preparing network conditions', id: `lh:gather:prepareThrottlingAndNetwork`};
   log.time(status);
 
-  if (options?.disableThrottling) await emulation.clearThrottling(session);
+  if (options.disableThrottling) await emulation.clearThrottling(session);
   else await emulation.throttle(session, settings);
 
   // Set request blocking before any network activity.
   // No "clearing" is done at the end of the recording since Network.setBlockedURLs([]) will unset all if
   // neccessary at the beginning of the next section.
-  const blockedUrls = (options?.blockedUrlPatterns || []).concat(
+  const blockedUrls = (options.blockedUrlPatterns || []).concat(
     settings.blockedUrlPatterns || []
   );
   await session.sendCommand('Network.setBlockedURLs', {urls: blockedUrls});
@@ -146,7 +146,10 @@ async function prepareTargetForTimespanMode(driver, settings) {
   log.time(status);
 
   await prepareDeviceEmulationAndAsyncStacks(driver, settings);
-  await prepareThrottlingAndNetwork(driver.defaultSession, settings);
+  await prepareThrottlingAndNetwork(driver.defaultSession, settings, {
+    disableThrottling: false,
+    blockedUrlPatterns: undefined,
+  });
 
   log.timeEnd(status);
 }
@@ -187,7 +190,7 @@ async function prepareTargetForNavigationMode(driver, settings) {
  *
  * @param {LH.Gatherer.FRProtocolSession} session
  * @param {LH.Config.Settings} settings
- * @param {{disableStorageReset?: boolean, blockedUrlPatterns?: string[], disableThrottling?: boolean, requestor: LH.NavigationRequestor}} navigation
+ * @param {Pick<LH.Config.NavigationDefn, 'disableThrottling'|'disableStorageReset'|'blockedUrlPatterns'> & {requestor: LH.NavigationRequestor}} navigation
  * @return {Promise<{warnings: Array<LH.IcuMessage>}>}
  */
 async function prepareTargetForIndividualNavigation(session, settings, navigation) {

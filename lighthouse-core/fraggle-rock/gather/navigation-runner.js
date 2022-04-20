@@ -18,6 +18,7 @@ const prepare = require('../../gather/driver/prepare.js');
 const {gotoURL} = require('../../gather/driver/navigation.js');
 const storage = require('../../gather/driver/storage.js');
 const emulation = require('../../lib/emulation.js');
+const {defaultNavigationConfig} = require('../../config/constants.js');
 const {initializeConfig} = require('../config/config.js');
 const {getBaseArtifacts, finalizeArtifacts} = require('./base-artifacts.js');
 const format = require('../../../shared/localization/format.js');
@@ -34,6 +35,7 @@ const NetworkRecords = require('../../computed/network-records.js');
  * @typedef NavigationContext
  * @property {Driver} driver
  * @property {LH.Config.FRConfig} config
+ * @property {LH.Config.NavigationDefn} navigation
  * @property {LH.NavigationRequestor} requestor
  * @property {LH.FRBaseArtifacts} baseArtifacts
  * @property {Map<string, LH.ArbitraryEqualityMap>} computedCache
@@ -46,11 +48,14 @@ const DEFAULT_HOSTNAME = '127.0.0.1';
 const DEFAULT_PORT = 9222;
 
 /**
- * @param {{driver: Driver, config: LH.Config.FRConfig}} args
+ * @param {{driver: Driver, config: LH.Config.FRConfig, options?: InternalOptions}} args
  * @return {Promise<{baseArtifacts: LH.FRBaseArtifacts}>}
  */
-async function _setup({driver, config}) {
+async function _setup({driver, config, options}) {
   await driver.connect();
+  if (!options?.skipAboutBlank) {
+    await gotoURL(driver, defaultNavigationConfig.blankPage, {waitUntil: ['navigated']});
+  }
 
   const baseArtifacts = await getBaseArtifacts(config, driver, {gatherMode: 'navigation'});
 
@@ -63,17 +68,17 @@ async function _setup({driver, config}) {
  * @param {NavigationContext} navigationContext
  * @return {Promise<{warnings: Array<LH.IcuMessage>}>}
  */
-async function _setupNavigation({requestor, driver, config, options}) {
+async function _setupNavigation({requestor, driver, navigation, config, options}) {
   if (!options?.skipAboutBlank) {
-    await gotoURL(
-      driver, config.settings.blankPage,
-      {...config.settings, waitUntil: ['navigated']}
-    );
+    await gotoURL(driver, navigation.blankPage, {...navigation, waitUntil: ['navigated']});
   }
   const {warnings} = await prepare.prepareTargetForIndividualNavigation(
     driver.defaultSession,
     config.settings,
-    {requestor}
+    {
+      ...navigation,
+      requestor,
+    }
   );
 
   return {warnings};
@@ -95,11 +100,11 @@ async function _navigate(navigationContext) {
 
   try {
     const {requestedUrl, mainDocumentUrl, warnings} = await gotoURL(driver, requestor, {
-      ...navigationContext.config.settings,
+      ...navigationContext.navigation,
       debugNavigation: config.settings.debugNavigation,
       maxWaitForFcp: config.settings.maxWaitForFcp,
       maxWaitForLoad: config.settings.maxWaitForLoad,
-      waitUntil: navigationContext.config.settings.pauseAfterFcpMs ? ['fcp', 'load'] : ['load'],
+      waitUntil: navigationContext.navigation.pauseAfterFcpMs ? ['fcp', 'load'] : ['load'],
     });
     return {requestedUrl, mainDocumentUrl, navigationError: undefined, warnings};
   } catch (err) {
@@ -171,7 +176,7 @@ async function _computeNavigationResult(
   const pageLoadError = debugData.records
     ? getPageLoadError(navigationError, {
       url: mainDocumentUrl,
-      loadFailureMode: 'fatal',
+      loadFailureMode: navigationContext.navigation.loadFailureMode,
       networkRecords: debugData.records,
     })
     : navigationError;
@@ -183,7 +188,7 @@ async function _computeNavigationResult(
 
     /** @type {Partial<LH.GathererArtifacts>} */
     const artifacts = {};
-    const pageLoadErrorId = 'pageLoadError';
+    const pageLoadErrorId = `pageLoadError-${navigationContext.navigation.id}`;
     if (debugData.devtoolsLog) artifacts.devtoolsLogs = {[pageLoadErrorId]: debugData.devtoolsLog};
     if (debugData.trace) artifacts.traces = {[pageLoadErrorId]: debugData.trace};
 
@@ -216,7 +221,7 @@ async function _navigation(navigationContext) {
     gatherMode: /** @type {const} */ ('navigation'),
     driver: navigationContext.driver,
     computedCache: navigationContext.computedCache,
-    artifactDefinitions: navigationContext.config.artifacts || [],
+    artifactDefinitions: navigationContext.navigation.artifacts,
     artifactState,
     baseArtifacts: navigationContext.baseArtifacts,
     settings: navigationContext.config.settings,
@@ -247,32 +252,41 @@ async function _navigation(navigationContext) {
 }
 
 /**
- * TODO: Remove/rename this function, it only makes sense when there are multiple config navigations.
  * @param {{driver: Driver, config: LH.Config.FRConfig, requestor: LH.NavigationRequestor; baseArtifacts: LH.FRBaseArtifacts, computedCache: NavigationContext['computedCache'], options?: InternalOptions}} args
  * @return {Promise<{artifacts: Partial<LH.FRArtifacts & LH.FRBaseArtifacts>}>}
  */
 async function _navigations({driver, config, requestor, baseArtifacts, computedCache, options}) {
+  if (!config.navigations) throw new Error('No navigations configured');
+
   /** @type {Partial<LH.FRArtifacts & LH.FRBaseArtifacts>} */
   const artifacts = {};
   /** @type {Array<LH.IcuMessage>} */
   const LighthouseRunWarnings = [];
 
-  const navigationContext = {
-    driver,
-    requestor,
-    config,
-    baseArtifacts,
-    computedCache,
-    options,
-  };
+  for (const navigation of config.navigations) {
+    const navigationContext = {
+      driver,
+      navigation,
+      requestor,
+      config,
+      baseArtifacts,
+      computedCache,
+      options,
+    };
 
-  const navigationResult = await _navigation(navigationContext);
-  if (navigationResult.pageLoadError) {
-    artifacts.PageLoadError = navigationResult.pageLoadError;
+    let shouldHaltNavigations = false;
+    const navigationResult = await _navigation(navigationContext);
+    if (navigation.loadFailureMode === 'fatal') {
+      if (navigationResult.pageLoadError) {
+        artifacts.PageLoadError = navigationResult.pageLoadError;
+        shouldHaltNavigations = true;
+      }
+    }
+
+    LighthouseRunWarnings.push(...navigationResult.warnings);
+    Object.assign(artifacts, navigationResult.artifacts);
+    if (shouldHaltNavigations) break;
   }
-
-  LighthouseRunWarnings.push(...navigationResult.warnings);
-  Object.assign(artifacts, navigationResult.artifacts);
 
   return {artifacts: {...artifacts, LighthouseRunWarnings}};
 }

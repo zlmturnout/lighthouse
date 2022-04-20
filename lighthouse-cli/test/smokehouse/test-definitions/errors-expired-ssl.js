@@ -48,11 +48,11 @@ const expectations = {
     PageLoadError: {code: 'INSECURE_DOCUMENT_REQUEST'},
     devtoolsLogs: {
       'pageLoadError-defaultPass': {...NONEMPTY_ARRAY, _legacyOnly: true},
-      'pageLoadError': {...NONEMPTY_ARRAY, _fraggleRockOnly: true},
+      'pageLoadError-default': {...NONEMPTY_ARRAY, _fraggleRockOnly: true},
     },
     traces: {
       'pageLoadError-defaultPass': {traceEvents: NONEMPTY_ARRAY, _legacyOnly: true},
-      'pageLoadError': {traceEvents: NONEMPTY_ARRAY, _fraggleRockOnly: true},
+      'pageLoadError-default': {traceEvents: NONEMPTY_ARRAY, _fraggleRockOnly: true},
     },
   },
 };

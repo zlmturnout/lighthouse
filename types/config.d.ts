@@ -30,7 +30,6 @@ declare module Config {
     artifacts?: ArtifactJson[] | null;
 
     // Legacy Only
-    /** @deprecated Only legacy navigations can configure multiple passes. Configure properties on `settings` instead */
     passes?: PassJson[] | null;
   }
 
@@ -51,6 +50,7 @@ declare module Config {
   interface FRConfig {
     settings: Settings;
     artifacts: AnyArtifactDefn[] | null;
+    navigations: NavigationDefn[] | null;
     audits: AuditDefn[] | null;
     categories: Record<string, Category> | null;
     groups: Record<string, Group> | null;
@@ -100,6 +100,17 @@ declare module Config {
     useThrottling?: boolean;
     /** The array of gatherers to run during the pass. */
     gatherers?: GathererJson[];
+  }
+
+  interface NavigationJson extends SharedPassNavigationJson {
+    /** The identifier for the navigation. Config extension will deduplicate navigations with the same id. */
+    id: string;
+    /** Whether throttling settings should be skipped for the pass. */
+    disableThrottling?: boolean;
+    /** Whether storage clearing (service workers, cache storage) should be skipped for the pass. A run-wide setting of `true` takes precedence over this value. */
+    disableStorageReset?: boolean;
+    /** The array of artifacts to collect during the navigation. */
+    artifacts?: Array<string>;
   }
 
   interface ArtifactJson {
@@ -162,8 +173,9 @@ declare module Config {
     gatherers: GathererDefn[];
   }
 
-  // TODO: Remove this type. It's only used in test files.
-  type NavigationDefn = Required<SharedPassNavigationJson>;
+  interface NavigationDefn extends Omit<Required<NavigationJson>, 'artifacts'> {
+    artifacts: AnyArtifactDefn[];
+  }
 
   interface ArtifactDefn<TDependencies extends Gatherer.DependencyKey = Gatherer.DependencyKey> {
     id: string;
