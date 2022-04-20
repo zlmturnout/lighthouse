@@ -106,30 +106,6 @@ function filterArtifactsByGatherMode(artifacts, mode) {
 }
 
 /**
- * Filters an array of navigations down to the set supported by the available artifacts.
- *
- * @param {LH.Config.FRConfig['navigations']} navigations
- * @param {Array<LH.Config.AnyArtifactDefn>} availableArtifacts
- * @return {LH.Config.FRConfig['navigations']}
- */
-function filterNavigationsByAvailableArtifacts(navigations, availableArtifacts) {
-  if (!navigations) return navigations;
-
-  const availableArtifactIds = new Set(
-    availableArtifacts.map(artifact => artifact.id).concat(baseArtifactKeys)
-  );
-
-  return navigations
-    .map(navigation => {
-      return {
-        ...navigation,
-        artifacts: navigation.artifacts.filter((artifact) => availableArtifactIds.has(artifact.id)),
-      };
-    })
-    .filter(navigation => navigation.artifacts.length);
-}
-
-/**
  * Filters an array of audits down to the set that can be computed using only the specified artifacts.
  *
  * @param {LH.Config.FRConfig['audits']} audits
@@ -310,12 +286,10 @@ function filterConfigByExplicitFilters(config, filters) {
   const availableCategories = filterCategoriesByAvailableAudits(config.categories, audits || []);
   const categories = filterCategoriesByExplicitFilters(availableCategories, onlyCategories);
   const artifacts = filterArtifactsByAvailableAudits(config.artifacts, audits);
-  const navigations = filterNavigationsByAvailableArtifacts(config.navigations, artifacts || []);
 
   return {
     ...config,
     artifacts,
-    navigations,
     audits,
     categories,
   };
@@ -326,7 +300,6 @@ module.exports = {
   filterConfigByExplicitFilters,
   filterArtifactsByGatherMode,
   filterArtifactsByAvailableAudits,
-  filterNavigationsByAvailableArtifacts,
   filterAuditsByAvailableArtifacts,
   filterAuditsByGatherMode,
   filterCategoriesByAvailableAudits,
