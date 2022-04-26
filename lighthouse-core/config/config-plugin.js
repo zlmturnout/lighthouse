@@ -124,6 +124,7 @@ class ConfigPlugin {
       description,
       manualDescription,
       auditRefs: auditRefsJson,
+      supportedModes,
       ...invalidRest
     } = categoryJson;
 
@@ -138,6 +139,9 @@ class ConfigPlugin {
     if (!i18n.isStringOrIcuMessage(manualDescription) && manualDescription !== undefined) {
       throw new Error(`${pluginName} has an invalid category manualDescription.`);
     }
+    if (!Array.isArray(supportedModes) && supportedModes !== undefined) {
+      throw new Error(`${pluginName} has an invalid category supportedModes.`);
+    }
     const auditRefs = ConfigPlugin._parseAuditRefsList(auditRefsJson, pluginName);
 
     return {
@@ -145,6 +149,7 @@ class ConfigPlugin {
       auditRefs,
       description: description,
       manualDescription: manualDescription,
+      supportedModes,
     };
   }
 
