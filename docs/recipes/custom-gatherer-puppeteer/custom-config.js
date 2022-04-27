@@ -6,13 +6,10 @@
 'use strict';
 
 module.exports = {
-  artifacts: [
-    {id: 'CustomGatherer', gatherer: 'custom-gatherer'},
-  ],
-  navigations: [{
-    id: 'default',
-    artifacts: [
-      'CustomGatherer',
+  passes: [{
+    passName: 'defaultPass',
+    gatherers: [
+      'custom-gatherer',
     ],
   }],
 
