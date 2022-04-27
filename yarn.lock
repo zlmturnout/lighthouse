@@ -3189,10 +3189,10 @@ detect-newline@^3.0.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
 
-devtools-protocol@0.0.901419, devtools-protocol@0.0.975298:
-  version "0.0.975298"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.975298.tgz#b134e8c98324f12bb57ad660639e73bc77649821"
-  integrity sha512-RNQxbC4gOlaojOPc47YJvwhx9LsmVBBgmCw0BoNRnC2Q83wqMuc/nJd+jeXQe0kcu+R2O6f83OmaE+gUejQQOw==
+devtools-protocol@0.0.901419, devtools-protocol@0.0.995287:
+  version "0.0.995287"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.995287.tgz#843a846cff79d0f76a74818ec2d604a4fe90c2d0"
+  integrity sha512-HvTDDBKzY5ojCNmxAF+N+kZGQsl+hPZPIaWpG0q1BMuvUHdRwL4IrGKIH+avNLzCrImi/kKYDnsmZi7jjm0xlw==
 
 diff-sequences@^27.4.0:
   version "27.4.0"
@@ -5628,10 +5628,10 @@ lighthouse-plugin-publisher-ads@^1.5.4:
     intl-messageformat "^4.1.2"
     yargs "^16.1.1"
 
-lighthouse-stack-packs@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/lighthouse-stack-packs/-/lighthouse-stack-packs-1.7.0.tgz#b159b68e4f974dbb1bd652957de97864cacb37ac"
-  integrity sha512-ggLg9V6Hs31Qcn29L2fwKsaQq8L5t+mIv3lNqwd85bc7zFxpMVybK71b4w2OeBLpa0H8gATIi9fxPlP+9moMDA==
+lighthouse-stack-packs@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/lighthouse-stack-packs/-/lighthouse-stack-packs-1.8.1.tgz#d0772a79f5e7f933109077fb80ccdbd68a43a283"
+  integrity sha512-LSCu9Ugt9NPvRfBNzAjMDLvYev9r/93OTmbIWt9iXwiCmd999I/zneRTwsFLtlQWGKwNbDHS9vXnU+KpXUb1qg==
 
 lines-and-columns@^1.1.6:
   version "1.2.4"
@@ -7563,10 +7563,10 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-third-party-web@^0.15.0:
-  version "0.15.0"
-  resolved "https://registry.yarnpkg.com/third-party-web/-/third-party-web-0.15.0.tgz#40790a6394233ecf1d0b8095abde3bfadde67338"
-  integrity sha512-kv+TVeppmasvDBXHfKCuQ4HNXapsyEXAGVANguzVDJ98xXm88ggtb9B09rVWvwDqapU5VZ4Q4JkCu2viyD/k0w==
+third-party-web@^0.17.1:
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/third-party-web/-/third-party-web-0.17.1.tgz#22e03f1ff519a6380bae4594b704b9bb28e15158"
+  integrity sha512-X9Mha8cVeBwakunlZXkXL6xRzw8VCcDGWqT59EzeTYAJIi8ien3CuufnEGEx4ZUFahumNQdoOwf4H2T9Ca6lBg==
 
 throat@^6.0.1:
   version "6.0.1"

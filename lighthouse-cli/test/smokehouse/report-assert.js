@@ -3,19 +3,17 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
 
 /**
  * @fileoverview An assertion library for comparing smoke-test expectations
  * against the results actually collected from Lighthouse.
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep.js';
 import log from 'lighthouse-logger';
 
 import {LocalConsole} from './lib/local-console.js';
-
-const {cloneDeep} = _;
+import {chromiumVersionCheck} from './version-check.js';
 
 /**
  * @typedef Difference
@@ -228,22 +226,26 @@ function pruneExpectations(localConsole, lhr, expected, reportOptions) {
 
   /**
    * Lazily compute the Chrome version because some reports are explicitly asserting error conditions.
-   * @returns {number}
+   * @returns {string}
    */
-  function getChromeVersion() {
+  function getChromeVersionString() {
     const userAgent = lhr.environment.hostUserAgent;
-    const userAgentMatch = /Chrome\/(\d+)/.exec(userAgent); // Chrome/85.0.4174.0
+    const userAgentMatch = /Chrome\/([\d.]+)/.exec(userAgent); // Chrome/85.0.4174.0
     if (!userAgentMatch) throw new Error('Could not get chrome version.');
-    return Number(userAgentMatch[1]);
+    const versionString = userAgentMatch[1];
+    if (versionString.split('.').length !== 4) throw new Error(`unexpected ua: ${userAgent}`);
+    return versionString;
   }
 
   /**
    * @param {*} obj
    */
   function failsChromeVersionCheck(obj) {
-    if (obj._minChromiumMilestone && getChromeVersion() < obj._minChromiumMilestone) return true;
-    if (obj._maxChromiumMilestone && getChromeVersion() > obj._maxChromiumMilestone) return true;
-    return false;
+    return !chromiumVersionCheck({
+      version: getChromeVersionString(),
+      min: obj._minChromiumVersion,
+      max: obj._maxChromiumVersion,
+    });
   }
 
   /**
@@ -272,7 +274,7 @@ function pruneExpectations(localConsole, lhr, expected, reportOptions) {
         localConsole.log([
           `[${key}] failed chrome version check, pruning expectation:`,
           JSON.stringify(value, null, 2),
-          `Actual Chromium version: ${getChromeVersion()}`,
+          `Actual Chromium version: ${getChromeVersionString()}`,
         ].join(' '));
         remove(key);
       } else if (value._legacyOnly && isFraggleRock) {
@@ -308,8 +310,8 @@ function pruneExpectations(localConsole, lhr, expected, reportOptions) {
     delete obj._legacyOnly;
     delete obj._fraggleRockOnly;
     delete obj._skipInBundled;
-    delete obj._minChromiumMilestone;
-    delete obj._maxChromiumMilestone;
+    delete obj._minChromiumVersion;
+    delete obj._maxChromiumVersion;
     delete obj._runner;
   }
 
