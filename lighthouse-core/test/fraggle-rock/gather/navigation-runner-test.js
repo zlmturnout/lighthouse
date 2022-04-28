@@ -174,29 +174,29 @@ describe('NavigationRunner', () => {
     });
 
     it('should ignore passes and only navigate once', async () => {
-      config = initializeConfig(
-        {
-          ...config,
-          artifacts: [
-            {id: 'FontSize', gatherer: 'seo/font-size'},
-            {id: 'ConsoleMessages', gatherer: 'console-messages'},
-            {id: 'ViewportDimensions', gatherer: 'viewport-dimensions'},
-            {id: 'AnchorElements', gatherer: 'anchor-elements'},
-          ],
-          passes: [
-            {passName: 'default', gatherers: ['FontSize']},
-            {passName: 'second', gatherers: ['ConsoleMessages']},
-            {passName: 'third', gatherers: ['ViewportDimensions']},
-            {passName: 'fourth', gatherers: ['AnchorElements']},
-          ],
-        },
-        {gatherMode: 'navigation'}
-      ).config;
+      // initializeConfig will always produce a single config navigation.
+      // This code will artificially construct a multiple navigations to test on the navigation runner.
+      const originalNavigation = config.navigations?.[0];
+      if (!originalNavigation) throw new Error('Should always have navigations');
+      const artifactDefns = originalNavigation.artifacts.filter(a =>
+        ['FontSize', 'ConsoleMessages', 'ViewportDimensions', 'AnchorElements'].includes(a.id)
+      );
+      const newNavigations = [];
+      for (let i = 0; i < artifactDefns.length; ++i) {
+        const artifactDefn = artifactDefns[i];
+        newNavigations.push({
+          ...originalNavigation,
+          id: i ? String(i) : 'default',
+          artifacts: [artifactDefn],
+        });
+      }
+
+      config.navigations = newNavigations;
 
       await run();
       const navigations = mocks.navigationMock.gotoURL.mock.calls;
       const pageNavigations = navigations.filter(call => call[1] === requestedUrl);
-      expect(pageNavigations).toHaveLength(1);
+      expect(pageNavigations).toHaveLength(4);
     });
 
     it('should backfill requested URL using a callback requestor', async () => {
@@ -226,6 +226,27 @@ describe('NavigationRunner', () => {
         mainDocumentUrl: requestedUrl,
         finalUrl: requestedUrl,
       });
+    });
+
+    it('should merge artifacts between navigations', async () => {
+      // initializeConfig will always produce a single config navigation.
+      // This code will artificially construct a second navigation to test on the navigation runner.
+      if (!config.navigations) throw new Error('Should always have navigations');
+      const firstNavigation = config.navigations[0];
+      const secondNavigation = {...firstNavigation, id: 'second'};
+      const fontSizeDef = firstNavigation.artifacts.find(a => a.id === 'FontSize');
+      const consoleMsgDef = firstNavigation.artifacts.find(a => a.id === 'ConsoleMessages');
+      if (!fontSizeDef || !consoleMsgDef) throw new Error('Artifact definitions not found');
+      secondNavigation.artifacts = [fontSizeDef];
+      firstNavigation.artifacts = [consoleMsgDef];
+      config.navigations.push(secondNavigation);
+
+      // Both gatherers will error in these test conditions, but artifact errors
+      // will be merged into single `artifacts` object.
+      const {artifacts} = await run();
+      const artifactIds = Object.keys(artifacts);
+      expect(artifactIds).toContain('FontSize');
+      expect(artifactIds).toContain('ConsoleMessages');
     });
 
     it('should retain PageLoadError and associated warnings', async () => {
