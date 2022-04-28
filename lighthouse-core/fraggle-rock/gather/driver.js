@@ -83,6 +83,11 @@ class Driver {
     if (!this._session) return;
     await this._session.dispose();
   }
+
+  /** @return {LH.Puppeteer.Page} */
+  getPage() {
+    return this._page;
+  }
 }
 
 module.exports = Driver;

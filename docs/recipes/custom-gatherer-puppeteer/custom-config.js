@@ -6,12 +6,18 @@
 'use strict';
 
 module.exports = {
-  passes: [{
-    passName: 'defaultPass',
-    gatherers: [
-      'custom-gatherer',
-    ],
-  }],
+  artifacts: [
+    {id: 'CustomGatherer', gatherer: 'custom-gatherer'},
+  ],
+
+  navigations: [
+    {
+      id: 'default',
+      artifacts: [
+        'CustomGatherer',
+      ],
+    },
+  ],
 
   audits: [
     'custom-audit',
