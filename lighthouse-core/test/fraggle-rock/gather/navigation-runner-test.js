@@ -173,7 +173,7 @@ describe('NavigationRunner', () => {
       await expect(run()).rejects.toBeTruthy();
     });
 
-    it('should ignore passes and only navigate once', async () => {
+    it('should navigate as many times as there are navigations', async () => {
       // initializeConfig will always produce a single config navigation.
       // This code will artificially construct a multiple navigations to test on the navigation runner.
       const originalNavigation = config.navigations?.[0];
