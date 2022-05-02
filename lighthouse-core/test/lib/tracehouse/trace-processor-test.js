@@ -204,13 +204,12 @@ describe('TraceProcessor', () => {
   describe('.processTrace() - frameTreeEvents', () => {
     it('frameTreeEvents excludes other frame trees', () => {
       const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-      const mainFrame = testTrace.traceEvents[0].args.frame;
+      const mainFrame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
       const childFrame = 'CHILDFRAME';
       const otherMainFrame = 'ANOTHERTAB';
       const cat = 'loading,rail,devtools.timeline';
       testTrace.traceEvents.push(
         /* eslint-disable max-len */
-        {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: mainFrame, url: 'https://example.com'}}},
         {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: childFrame, parent: mainFrame, url: 'https://frame.com'}}},
         {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: otherMainFrame, url: 'https://example.com'}}},
         {name: 'Event1', cat, args: {frame: mainFrame}},
@@ -231,7 +230,7 @@ describe('TraceProcessor', () => {
 
     it('frameTreeEvents includes main frame events if no FrameCommittedInBrowser found', () => {
       const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-      const mainFrame = testTrace.traceEvents[0].args.frame;
+      const mainFrame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
       const childFrame = 'CHILDFRAME';
       const otherMainFrame = 'ANOTHERTAB';
       const cat = 'loading,rail,devtools.timeline';
@@ -249,6 +248,37 @@ describe('TraceProcessor', () => {
         'firstContentfulPaint',
         'firstMeaningfulPaint',
         'Event1',
+      ]);
+    });
+
+    it('frameTreeEvents included even if no FrameCommittedInBrowser events', () => {
+      const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
+      testTrace.traceEvents = testTrace.traceEvents
+        .filter(e => e.name !== 'FrameCommittedInBrowser');
+
+      const mainFrame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
+      const childFrame = 'CHILDFRAME';
+      const otherMainFrame = 'ANOTHERTAB';
+      const cat = 'loading,rail,devtools.timeline';
+
+      testTrace.traceEvents.find(e => e.name === 'TracingStartedInBrowser').args.data.frames.push(
+        {frame: childFrame, parent: mainFrame, url: 'https://frame.com'},
+        {frame: otherMainFrame, url: 'https://example.com'}
+      );
+
+      testTrace.traceEvents.push(
+        {name: 'Event1', cat, args: {frame: mainFrame}},
+        {name: 'Event2', cat, args: {frame: childFrame}},
+        {name: 'Event3', cat, args: {frame: otherMainFrame}}
+      );
+      const trace = TraceProcessor.processTrace(testTrace);
+      expect(trace.frameTreeEvents.map(e => e.name)).toEqual([
+        'navigationStart',
+        'domContentLoadedEventEnd',
+        'firstContentfulPaint',
+        'firstMeaningfulPaint',
+        'Event1',
+        'Event2',
       ]);
     });
   });
@@ -536,7 +566,7 @@ Object {
 
       it('uses latest candidate', () => {
         const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-        const frame = testTrace.traceEvents[0].args.frame;
+        const frame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
         const args = {frame, data: {size: 50}};
         const cat = 'loading,rail,devtools.timeline';
         testTrace.traceEvents.push(
@@ -560,7 +590,7 @@ Object {
 
       it('invalidates if last event is ::Invalidate', () => {
         const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-        const frame = testTrace.traceEvents[0].args.frame;
+        const frame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
         const args = {frame};
         const cat = 'loading,rail,devtools.timeline';
         testTrace.traceEvents.push(
@@ -629,17 +659,16 @@ Object {
 
       it('finds FCP from all frames', () => {
         const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-        const mainFrame = testTrace.traceEvents[0].args.frame;
+        const mainFrame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
         const childFrame = 'CHILDFRAME';
         const cat = 'loading,rail,devtools.timeline';
 
         // Remove default FCP event because we will define them manually.
-        testTrace.traceEvents
-          = testTrace.traceEvents.filter(e => e.name !== 'firstContentfulPaint');
+        testTrace.traceEvents =
+          testTrace.traceEvents.filter(e => e.name !== 'firstContentfulPaint');
 
         testTrace.traceEvents.push(
           /* eslint-disable max-len */
-          {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: mainFrame, url: 'https://example.com'}}, ts: 900, duration: 10},
           {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: childFrame, parent: mainFrame, url: 'https://frame.com'}}, ts: 910, duration: 10},
           {name: 'firstContentfulPaint', cat, args: {frame: childFrame}, ts: 1000, duration: 10},
           {name: 'firstContentfulPaint', cat, args: {frame: mainFrame}, ts: 1100, duration: 10}
@@ -653,12 +682,11 @@ Object {
 
       it('finds LCP from all frames', () => {
         const testTrace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-        const mainFrame = testTrace.traceEvents[0].args.frame;
+        const mainFrame = testTrace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
         const childFrame = 'CHILDFRAME';
         const cat = 'loading,rail,devtools.timeline';
         testTrace.traceEvents.push(
           /* eslint-disable max-len */
-          {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: mainFrame, url: 'https://example.com'}}, ts: 900, duration: 10},
           {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: childFrame, parent: mainFrame, url: 'https://frame.com'}}, ts: 910, duration: 10},
           {name: 'largestContentfulPaint::Candidate', cat, args: {data: {size: 300}, frame: mainFrame}, ts: 1000, duration: 10},
           {name: 'largestContentfulPaint::Candidate', cat, args: {data: {size: 100}, frame: childFrame}, ts: 1100, duration: 10},

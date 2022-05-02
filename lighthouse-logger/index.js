@@ -5,13 +5,14 @@
  */
 'use strict';
 
-const debug = require('debug');
-const marky = require('marky');
+import process from 'process';
+import debug from 'debug';
+import * as marky from 'marky';
+import {EventEmitter} from 'events';
 
-const EventEmitter = require('events').EventEmitter;
 const isWindows = process.platform === 'win32';
 
-// process.browser is set when browserify'd via the `process` npm module
+// @ts-expect-error: process.browser is set via Rollup.
 const isBrowser = process.browser;
 
 const colors = {
@@ -54,7 +55,7 @@ const loggersByTitle = {};
 const loggingBufferColumns = 25;
 let level_;
 
-class Log {
+export default class Log {
   static _logToStdErr(title, argsArray) {
     const log = Log.loggerfn(title);
     log(...argsArray);
@@ -238,5 +239,3 @@ Log.takeTimeEntries = () => {
   return entries;
 };
 Log.getTimeEntries = () => marky.getEntries();
-
-module.exports = Log;

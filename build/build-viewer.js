@@ -5,39 +5,37 @@
  */
 'use strict';
 
-const fs = require('fs');
-const browserify = require('browserify');
+const rollup = require('rollup');
 const rollupPlugins = require('./rollup-plugins.js');
 const GhPagesApp = require('./gh-pages-app.js');
-const {minifyFileTransform} = require('./build-utils.js');
 const {LH_ROOT} = require('../root.js');
 
-const localeBasenames = fs.readdirSync(LH_ROOT + '/shared/localization/locales/');
-const actualLocales = localeBasenames
-  .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
-  .map(locale => locale.replace('.json', ''))
-  .sort();
+async function buildReportGenerator() {
+  const bundle = await rollup.rollup({
+    input: 'report/generator/report-generator.js',
+    plugins: [
+      rollupPlugins.shim({
+        [`${LH_ROOT}/report/generator/flow-report-assets.js`]: 'export default {}',
+      }),
+      rollupPlugins.commonjs(),
+      rollupPlugins.nodeResolve(),
+      rollupPlugins.inlineFs({verbose: Boolean(process.env.DEBUG)}),
+    ],
+  });
+
+  const result = await bundle.generate({
+    format: 'umd',
+    name: 'ReportGenerator',
+  });
+  await bundle.close();
+  return result.output[0].code;
+}
 
 /**
  * Build viewer, optionally deploying to gh-pages if `--deploy` flag was set.
  */
 async function run() {
-  // JS bundle from browserified ReportGenerator.
-  const generatorFilename = `${LH_ROOT}/report/generator/report-generator.js`;
-  const generatorBrowserify = browserify(generatorFilename, {standalone: 'ReportGenerator'})
-    // Flow report is not used in report viewer, so don't include flow assets.
-    .ignore(require.resolve('../report/generator/flow-report-assets.js'))
-    .transform('@wardpeet/brfs', {
-      readFileTransform: minifyFileTransform,
-    });
-
-  /** @type {Promise<string>} */
-  const generatorJsPromise = new Promise((resolve, reject) => {
-    generatorBrowserify.bundle((err, src) => {
-      if (err) return reject(err);
-      resolve(src.toString());
-    });
-  });
+  const reportGeneratorJs = await buildReportGenerator();
 
   const app = new GhPagesApp({
     name: 'viewer',
@@ -45,26 +43,29 @@ async function run() {
     html: {path: 'index.html'},
     stylesheets: [
       {path: 'styles/*'},
+      {path: '../../flow-report/assets/styles.css'},
     ],
     javascripts: [
-      await generatorJsPromise,
+      reportGeneratorJs,
       {path: require.resolve('pako/dist/pako_inflate.js')},
       {path: 'src/main.js', rollup: true, rollupPlugins: [
-        rollupPlugins.replace({
-          // Default delimiters are word boundraries. Setting them to nothing (empty strings)
-          // makes this plugin replace any subtring found.
-          delimiters: ['', ''],
-          values: {
-            '[\'__availableLocales__\']': JSON.stringify(actualLocales),
-          },
+        rollupPlugins.shim({
+          './locales.js': 'export default {}',
         }),
+        rollupPlugins.typescript({
+          tsconfig: 'flow-report/tsconfig.json',
+          // Plugin struggles with custom outDir, so revert it from tsconfig value
+          // as well as any options that require an outDir is set.
+          outDir: null,
+          composite: false,
+          emitDeclarationOnly: false,
+          declarationMap: false,
+        }),
+        rollupPlugins.inlineFs({verbose: Boolean(process.env.DEBUG)}),
         rollupPlugins.replace({
           values: {
             '__dirname': '""',
           },
-        }),
-        rollupPlugins.shim({
-          './locales.js': 'export default {}',
         }),
         rollupPlugins.commonjs(),
         rollupPlugins.nodePolyfills(),
@@ -86,4 +87,7 @@ async function run() {
   }
 }
 
-run();
+run().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

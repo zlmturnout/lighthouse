@@ -7,28 +7,26 @@
 
 const fs = require('fs');
 
-const MessageFormat = require('intl-messageformat').default;
+const MessageFormat = require('intl-messageformat');
 const {isObjectOfUnknownValues, isObjectOrArrayOfUnknownValues} = require('../type-verifiers.js');
 
 /** Contains available locales with messages. May be an empty object if bundled. */
-const LOCALE_MESSAGES = require('./locales.js');
+/** @type {import('./locales')} */
+// @ts-expect-error TODO(esmodules): remove when file is es modules.
+const LOCALE_MESSAGES = require('./locales.js').default || require('./locales.js');
 
 const DEFAULT_LOCALE = 'en-US';
 
 /**
  * The locale tags for the localized messages available to Lighthouse on disk.
- * When bundled, these will be inlined by brfs.
+ * When bundled, these will be inlined by `inline-fs`.
  * These locales are considered the "canonical" locales. We support other locales which
  * are simply aliases to one of these. ex: es-AR (alias) -> es-419 (canonical)
  */
-let CANONICAL_LOCALES = ['__availableLocales__'];
-// TODO: need brfs in gh-pages-app. For now, above is replaced, see build-i18n.module.js
-if (fs.readdirSync) {
-  CANONICAL_LOCALES = fs.readdirSync(__dirname + '/locales/')
-    .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
-    .map(locale => locale.replace('.json', ''))
-    .sort();
-}
+const CANONICAL_LOCALES = fs.readdirSync(__dirname + '/locales/')
+  .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
+  .map(locale => locale.replace('.json', ''))
+  .sort();
 
 /** @typedef {import('intl-messageformat-parser').Element} MessageElement */
 /** @typedef {import('intl-messageformat-parser').ArgumentElement} ArgumentElement */
@@ -97,7 +95,7 @@ function collectAllCustomElementsFromICU(icuElements, seenElementsById = new Map
  * Returns a copy of the `values` object, with the values formatted based on how
  * they will be used in their icuMessage, e.g. KB or milliseconds. The original
  * object is unchanged.
- * @param {MessageFormat} messageFormatter
+ * @param {MessageFormat.IntlMessageFormat} messageFormatter
  * @param {Readonly<Record<string, string | number>>} values
  * @param {string} lhlMessage Used for clear error logging.
  * @return {Record<string, string | number>}
@@ -175,7 +173,10 @@ function formatMessage(message, values = {}, locale) {
   // When using accented english, force the use of a different locale for number formatting.
   const localeForMessageFormat = (locale === 'en-XA' || locale === 'en-XL') ? 'de-DE' : locale;
 
-  const formatter = new MessageFormat(message, localeForMessageFormat, formats);
+  // This package is not correctly bundled by Rollup.
+  /** @type {typeof MessageFormat.IntlMessageFormat} */
+  const MessageFormatCtor = MessageFormat.IntlMessageFormat || MessageFormat;
+  const formatter = new MessageFormatCtor(message, localeForMessageFormat, formats);
 
   // Preformat values for the message format like KB and milliseconds.
   const valuesForMessageFormat = _preformatValues(formatter, values, message);

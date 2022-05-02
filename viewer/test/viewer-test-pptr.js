@@ -3,7 +3,6 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
 
 /* eslint-env jest */
 
@@ -21,6 +20,8 @@ import {getCanonicalLocales} from '../../shared/localization/format.js';
 const portNumber = 10200;
 const viewerUrl = `http://localhost:${portNumber}/dist/gh-pages/viewer/index.html`;
 const sampleLhr = LH_ROOT + '/lighthouse-core/test/results/sample_v2.json';
+// eslint-disable-next-line max-len
+const sampleFlowResult = LH_ROOT + '/lighthouse-core/test/fixtures/fraggle-rock/reports/sample-flow-result.json';
 
 const lighthouseCategories = Object.keys(defaultConfig.categories);
 const getAuditsOfCategory = category => defaultConfig.categories[category].auditRefs;
@@ -83,12 +84,37 @@ describe('Lighthouse Viewer', () => {
     ]);
   });
 
+  describe('Renders the flow report', () => {
+    beforeAll(async () => {
+      await viewerPage.goto(viewerUrl, {waitUntil: 'networkidle2', timeout: 30000});
+      const fileInput = await viewerPage.$('#hidden-file-input');
+      await fileInput.uploadFile(sampleFlowResult);
+      await viewerPage.waitForSelector('.App', {timeout: 30000});
+    });
+
+    it('should load with no errors', async () => {
+      assert.deepStrictEqual(pageErrors, []);
+    });
+
+    it('renders the summary page', async () => {
+      const summary = await viewerPage.evaluate(() => document.querySelector('.Summary'));
+      assert.ok(summary);
+
+      const scores = await viewerPage.evaluate(() =>
+        Array.from(document.querySelectorAll('.lh-gauge__wrapper, .lh-fraction__wrapper'))
+      );
+      assert.equal(scores.length, 14);
+
+      assert.deepStrictEqual(pageErrors, []);
+    });
+  });
+
   describe('Renders the report', () => {
     beforeAll(async function() {
       await viewerPage.goto(viewerUrl, {waitUntil: 'networkidle2', timeout: 30000});
       const fileInput = await viewerPage.$('#hidden-file-input');
       await fileInput.uploadFile(sampleLhr);
-      await viewerPage.waitForSelector('.lh-container', {timeout: 30000});
+      await viewerPage.waitForSelector('.lh-categories', {timeout: 30000});
     });
 
     it('should load with no errors', async () => {
@@ -108,7 +134,7 @@ describe('Lighthouse Viewer', () => {
       for (const category of lighthouseCategories) {
         let expected = getAuditsOfCategory(category);
         if (category === 'performance') {
-          expected = getAuditsOfCategory(category).filter(a => !!a.group);
+          expected = getAuditsOfCategory(category).filter(a => a.group !== 'hidden');
         }
         expected = expected.map(audit => audit.id);
         const elementIds = await getAuditElementsIds({category, selector: selectors.audits});
@@ -174,6 +200,44 @@ describe('Lighthouse Viewer', () => {
       expect(resultAfterSwap.selectedValue).toBe('es');
       expect(resultAfterSwap.sampleString).toBe('Copiar JSON');
     });
+
+    it('should support saving as html', async () => {
+      const tmpDir = `${LH_ROOT}/.tmp/pptr-downloads`;
+      fs.rmSync(tmpDir, {force: true, recursive: true});
+      await viewerPage._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: tmpDir,
+      });
+
+      await viewerPage.click('.lh-tools__button');
+      await viewerPage.waitForFunction(() => {
+        return getComputedStyle(
+          document.querySelector('.lh-tools__dropdown')).visibility === 'visible';
+      });
+
+      const [, filename] = await Promise.all([
+        viewerPage.click('a[data-action="save-html"]'),
+        new Promise(resolve => {
+          viewerPage._client.on('Page.downloadWillBegin', ({suggestedFilename}) => {
+            resolve(suggestedFilename);
+          });
+        }),
+        new Promise(resolve => {
+          viewerPage._client.on('Page.downloadProgress', ({state}) => {
+            if (state === 'completed') resolve();
+          });
+        }),
+      ]);
+
+      const savedPage = await browser.newPage();
+      const savedPageErrors = [];
+      savedPage.on('pageerror', pageError => savedPageErrors.push(pageError));
+      const firstLogPromise =
+        new Promise(resolve => savedPage.once('console', e => resolve(e.text())));
+      await savedPage.goto(`file://${tmpDir}/${filename}`);
+      expect(await firstLogPromise).toEqual('window.__LIGHTHOUSE_JSON__ JSHandle@object');
+      expect(savedPageErrors).toHaveLength(0);
+    });
   });
 
   describe('PSI', () => {
@@ -196,7 +260,7 @@ describe('Lighthouse Viewer', () => {
     const badPsiResponse = {
       status: 500,
       contentType: 'application/json',
-      body: JSON.stringify({error: {message: 'Test error'}}),
+      body: JSON.stringify({error: {message: 'badPsiResponse error'}}),
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -332,11 +396,11 @@ describe('Lighthouse Viewer', () => {
       // Wait for error.
       const errorEl = await viewerPage.waitForSelector('#lh-log.lh-show');
       const errorMessage = await viewerPage.evaluate(errorEl => errorEl.textContent, errorEl);
-      expect(errorMessage).toBe('Test error');
+      expect(errorMessage).toBe('badPsiResponse error');
 
       // One error.
       expect(pageErrors).toHaveLength(1);
-      expect(pageErrors[0].message).toContain('Test error');
+      expect(pageErrors[0].message).toContain('badPsiResponse error');
     });
   });
 });

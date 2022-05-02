@@ -37,7 +37,7 @@ const IGNORE_THRESHOLD_IN_BYTES = 2048;
 const IGNORE_THRESHOLD_IN_PERCENT = 75;
 const IGNORE_THRESHOLD_IN_MS = 50;
 
-/** @typedef {{url: string, requestStartTime: number, totalBytes: number, wastedBytes: number, wastedPercent: number}} WasteResult */
+/** @typedef {{node: LH.Audit.Details.NodeValue, url: string, requestStartTime: number, totalBytes: number, wastedBytes: number, wastedPercent: number}} WasteResult */
 
 class OffscreenImages extends ByteEfficiencyAudit {
   /**
@@ -51,7 +51,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
       scoreDisplayMode: ByteEfficiencyAudit.SCORING_MODES.NUMERIC,
       supportedModes: ['navigation'],
       requiredArtifacts: ['ImageElements', 'ViewportDimensions', 'GatherContext', 'devtoolsLogs',
-        'traces'],
+        'traces', 'URL'],
     };
   }
 
@@ -100,6 +100,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
     }
 
     return {
+      node: ByteEfficiencyAudit.makeNodeItem(image.node),
       url,
       requestStartTime: networkRecord.startTime,
       totalBytes,
@@ -181,29 +182,30 @@ class OffscreenImages extends ByteEfficiencyAudit {
     const gatherContext = artifacts.GatherContext;
     const trace = artifacts.traces[ByteEfficiencyAudit.DEFAULT_PASS];
     const devtoolsLog = artifacts.devtoolsLogs[ByteEfficiencyAudit.DEFAULT_PASS];
+    const URL = artifacts.URL;
 
     /** @type {string[]} */
     const warnings = [];
-    const resultsMap = images.reduce((results, image) => {
+    /** @type {Map<string, WasteResult>} */
+    const resultsMap = new Map();
+    for (const image of images) {
       const processed = OffscreenImages.computeWaste(image, viewportDimensions, networkRecords);
       if (processed === null) {
-        return results;
+        continue;
       }
 
       if (processed instanceof Error) {
         warnings.push(processed.message);
         Sentry.captureException(processed, {tags: {audit: this.meta.id}, level: 'warning'});
-        return results;
+        continue;
       }
 
       // If an image was used more than once, warn only about its least wasteful usage
-      const existing = results.get(processed.url);
+      const existing = resultsMap.get(processed.url);
       if (!existing || existing.wastedBytes > processed.wastedBytes) {
-        results.set(processed.url, processed);
+        resultsMap.set(processed.url, processed);
       }
-
-      return results;
-    }, /** @type {Map<string, WasteResult>} */ (new Map()));
+    }
 
     const settings = context.settings;
 
@@ -211,7 +213,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
     const unfilteredResults = Array.from(resultsMap.values());
     // get the interactive time or fallback to getting the end of trace time
     try {
-      const metricComputationData = {trace, devtoolsLog, gatherContext, settings};
+      const metricComputationData = {trace, devtoolsLog, gatherContext, settings, URL};
       const interactive = await Interactive.request(metricComputationData, context);
 
       // use interactive to generate items
@@ -233,7 +235,7 @@ class OffscreenImages extends ByteEfficiencyAudit {
 
     /** @type {LH.Audit.Details.Opportunity['headings']} */
     const headings = [
-      {key: 'url', valueType: 'thumbnail', label: ''},
+      {key: 'node', valueType: 'node', label: ''},
       {key: 'url', valueType: 'url', label: str_(i18n.UIStrings.columnURL)},
       {key: 'totalBytes', valueType: 'bytes', label: str_(i18n.UIStrings.columnResourceSize)},
       {key: 'wastedBytes', valueType: 'bytes', label: str_(i18n.UIStrings.columnWastedBytes)},

@@ -44,7 +44,7 @@ class UsesResponsiveImages extends ByteEfficiencyAudit {
       description: str_(UIStrings.description),
       scoreDisplayMode: ByteEfficiencyAudit.SCORING_MODES.NUMERIC,
       requiredArtifacts: ['ImageElements', 'ViewportDimensions', 'GatherContext',
-        'devtoolsLogs', 'traces'],
+        'devtoolsLogs', 'traces', 'URL'],
     };
   }
 
@@ -104,6 +104,7 @@ class UsesResponsiveImages extends ByteEfficiencyAudit {
     const wastedBytes = Math.round(totalBytes * wastedRatio);
 
     return {
+      node: ByteEfficiencyAudit.makeNodeItem(image.node),
       url,
       totalBytes,
       wastedBytes,
@@ -158,7 +159,7 @@ class UsesResponsiveImages extends ByteEfficiencyAudit {
 
     /** @type {LH.Audit.Details.Opportunity['headings']} */
     const headings = [
-      {key: 'url', valueType: 'thumbnail', label: ''},
+      {key: 'node', valueType: 'node', label: ''},
       {key: 'url', valueType: 'url', label: str_(i18n.UIStrings.columnURL)},
       {key: 'totalBytes', valueType: 'bytes', label: str_(i18n.UIStrings.columnResourceSize)},
       {key: 'wastedBytes', valueType: 'bytes', label: str_(i18n.UIStrings.columnWastedBytes)},

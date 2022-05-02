@@ -78,7 +78,7 @@ describe('Sized images audit', () => {
     expect(result.score).toEqual(1);
   });
 
-  it('passes when an image is a non-network SVG', async () => {
+  it('passes when an image is a non-network SVG data url base64', async () => {
     const result = await runAudit({
       attributeWidth: '',
       attributeHeight: '',
@@ -86,8 +86,20 @@ describe('Sized images audit', () => {
         width: null,
         height: null,
       },
-      mimeType: 'image/svg+xml',
       src: 'data:image/svg+xml;base64,foo',
+    });
+    expect(result.score).toEqual(1);
+  });
+
+  it('passes when an image is a non-network SVG data url with encoded characters', async () => {
+    const result = await runAudit({
+      attributeWidth: '',
+      attributeHeight: '',
+      cssEffectiveRules: {
+        width: null,
+        height: null,
+      },
+      src: 'data:image/svg+xml,%3csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20version=%271.1%27%20width=%27200%27%20height=%27200%27/%3e',
     });
     expect(result.score).toEqual(1);
   });
@@ -137,7 +149,6 @@ describe('Sized images audit', () => {
           width: null,
           height: '100',
         },
-        mimeType: 'image/svg+xml',
       });
       expect(result.score).toEqual(0);
     });

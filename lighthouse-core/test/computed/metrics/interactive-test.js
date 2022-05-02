@@ -8,9 +8,10 @@
 const assert = require('assert').strict;
 
 const Interactive = require('../../../computed/metrics/interactive.js');
-const {loadTraceFixture} = require('../../test-utils.js');
+const {getURLArtifactFromDevtoolsLog, loadTraceFixture} = require('../../test-utils.js');
 
 const {trace, devtoolsLog} = loadTraceFixture('progressive-app-m60');
+const URL = getURLArtifactFromDevtoolsLog(devtoolsLog);
 
 /**
  * Simple wrapper to just coerce return type to LanternMetric.
@@ -54,8 +55,7 @@ describe('Metrics: TTI', () => {
       {throttlingMethod: 'simulate'}
     );
     const context = {settings, computedCache: new Map()};
-    const result = await getResult({trace, devtoolsLog, gatherContext, settings},
-      context);
+    const result = await getResult({trace, devtoolsLog, gatherContext, settings, URL}, context);
 
     expect({
       timing: Math.round(result.timing),
@@ -73,7 +73,7 @@ describe('Metrics: TTI', () => {
       {throttlingMethod: 'provided', formFactor: 'desktop'}
     );
     const context = {settings, computedCache: new Map()};
-    const result = await getResult({trace, devtoolsLog, gatherContext, settings},
+    const result = await getResult({trace, devtoolsLog, gatherContext, settings, URL},
       context);
 
     assert.equal(Math.round(result.timing), 1582);
@@ -85,7 +85,7 @@ describe('Metrics: TTI', () => {
       {throttlingMethod: 'provided', formFactor: 'mobile'}
     );
     const context = {settings, computedCache: new Map()};
-    const result = await getResult({trace, devtoolsLog, gatherContext, settings},
+    const result = await getResult({trace, devtoolsLog, gatherContext, settings, URL},
       context);
 
     assert.equal(Math.round(result.timing), 1582);

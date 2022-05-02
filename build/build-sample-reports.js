@@ -23,6 +23,11 @@ const flowResult = readJson(
   `${LH_ROOT}/lighthouse-core/test/fixtures/fraggle-rock/reports/sample-flow-result.json`
 );
 
+const snapshotLhr = flowResult.steps.find(step => step.lhr.gatherMode === 'snapshot')?.lhr;
+const timespanLhr = flowResult.steps.find(step => step.lhr.gatherMode === 'timespan')?.lhr;
+if (!snapshotLhr) throw new Error('Could not find a snapshot report on the sample flow result');
+if (!timespanLhr) throw new Error('Could not find a timespan report on the sample flow result');
+
 const DIST = path.join(LH_ROOT, 'dist');
 
 (async function() {
@@ -36,6 +41,8 @@ const DIST = path.join(LH_ROOT, 'dist');
     'xl-accented': swapLocale(lhr, 'en-XL').lhr,
     'error': errorLhr,
     'single-category': tweakLhrForPsi(lhr),
+    'snapshot': snapshotLhr,
+    'timespan': timespanLhr,
   };
 
   // Generate and write reports
@@ -59,7 +66,10 @@ const DIST = path.join(LH_ROOT, 'dist');
   });
 
   generateFlowReports();
-})();
+})().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
 
 function generateFlowReports() {
   const filenameToFlowResult = {
@@ -147,7 +157,9 @@ async function generateErrorLHR() {
     Stacks: [],
     settings: defaultSettings,
     URL: {
+      initialUrl: 'about:blank',
       requestedUrl: 'http://fakeurl.com',
+      mainDocumentUrl: 'http://fakeurl.com',
       finalUrl: 'http://fakeurl.com',
     },
     GatherContext: {gatherMode: 'navigation'},

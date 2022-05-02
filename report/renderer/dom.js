@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 /* eslint-env browser */
 
@@ -27,14 +26,18 @@ import {createComponent} from './components.js';
 export class DOM {
   /**
    * @param {Document} document
+   * @param {HTMLElement} rootEl
    */
-  constructor(document) {
+  constructor(document, rootEl) {
     /** @type {Document} */
     this._document = document;
     /** @type {string} */
     this._lighthouseChannel = 'unknown';
     /** @type {Map<string, DocumentFragment>} */
     this._componentCache = new Map();
+    /** @type {HTMLElement} */
+    // For legacy Report API users, this'll be undefined, but set in renderReport
+    this.rootEl = rootEl;
   }
 
   /**
@@ -75,6 +78,15 @@ export class DOM {
   createFragment() {
     return this._document.createDocumentFragment();
   }
+
+  /**
+   * @param {string} data
+   * @return {!Node}
+   */
+  createTextNode(data) {
+    return this._document.createTextNode(data);
+  }
+
 
   /**
    * @template {string} T
@@ -216,6 +228,8 @@ export class DOM {
   }
 
   /**
+   * ONLY use if `dom.rootEl` isn't sufficient for your needs. `dom.rootEl` is preferred
+   * for all scoping, because a document can have multiple reports within it.
    * @return {Document}
    */
   document() {
@@ -278,10 +292,8 @@ export class DOM {
    * @param {string} filename
    */
   saveFile(blob, filename) {
-    const ext = blob.type.match('json') ? '.json' : '.html';
-
     const a = this.createElement('a');
-    a.download = `${filename}${ext}`;
+    a.download = filename;
     this.safelySetBlobHref(a, blob);
     this._document.body.appendChild(a); // Firefox requires anchor to be in the DOM.
     a.click();

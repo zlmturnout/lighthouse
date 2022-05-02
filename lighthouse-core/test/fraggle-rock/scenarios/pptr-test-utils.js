@@ -6,7 +6,8 @@
 'use strict';
 
 import {beforeAll, beforeEach, afterAll, afterEach} from '@jest/globals';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import {getChromePath} from 'chrome-launcher';
 import {Server} from '../../../../lighthouse-cli/test/fixtures/static-server.js';
 
 /** @typedef {InstanceType<typeof import('../../../../lighthouse-cli/test/fixtures/static-server.js').Server>} StaticServer */
@@ -28,8 +29,8 @@ export function createTestState() {
   }});
 
   return {
-    browser: /** @type {import('puppeteer').Browser} */ (any('browser')),
-    page: /** @type {import('puppeteer').Page} */ (any('page')),
+    browser: /** @type {LH.Puppeteer.Browser} */ (any('browser')),
+    page: /** @type {LH.Puppeteer.Page} */ (any('page')),
     server: /** @type {StaticServer} */ (any('server')),
     serverBaseUrl: '',
 
@@ -40,6 +41,7 @@ export function createTestState() {
         this.serverBaseUrl = `http://localhost:${this.server.getPort()}`;
         this.browser = await puppeteer.launch({
           headless: true,
+          executablePath: getChromePath(),
         });
       });
 

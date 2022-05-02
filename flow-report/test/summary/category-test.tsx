@@ -11,7 +11,6 @@ import {SummaryTooltip} from '../../src/summary/category';
 import {flowResult} from '../sample-flow';
 import {I18nProvider} from '../../src/i18n/i18n';
 import {FlowResultContext} from '../../src/util';
-import {ReportRendererProvider} from '../../src/wrappers/report-renderer';
 
 let wrapper: FunctionComponent;
 
@@ -19,11 +18,9 @@ beforeEach(() => {
   // Include sample flowResult for locale in I18nProvider.
   wrapper = ({children}) => (
     <FlowResultContext.Provider value={flowResult}>
-      <ReportRendererProvider>
-        <I18nProvider>
-          {children}
-        </I18nProvider>
-      </ReportRendererProvider>
+      <I18nProvider>
+        {children}
+      </I18nProvider>
     </FlowResultContext.Provider>
   );
 });
@@ -51,7 +48,7 @@ describe('SummaryTooltip', () => {
     expect(() => root.getByText(/^[0-9]+$/)).toThrow();
     expect(root.getByText('2 audits passed')).toBeTruthy();
     expect(root.getByText('3 passable audits')).toBeTruthy();
-    expect(root.getByText('https://example.com'));
+    expect(root.getByText('https://example.com')).toBeTruthy();
   });
 
   it('renders tooltip without rating', async () => {
@@ -76,7 +73,7 @@ describe('SummaryTooltip', () => {
     expect(() => root.getByText(/^[0-9]+$/)).toThrow();
     expect(root.getByText('2 audits passed')).toBeTruthy();
     expect(root.getByText('3 passable audits')).toBeTruthy();
-    expect(root.getByText('https://example.com'));
+    expect(root.getByText('https://example.com')).toBeTruthy();
   });
 
   it('renders scored category tooltip with score', async () => {
@@ -101,7 +98,7 @@ describe('SummaryTooltip', () => {
     expect(root.getByText('100')).toBeTruthy();
     expect(root.getByText('2 audits passed')).toBeTruthy();
     expect(root.getByText('3 passable audits')).toBeTruthy();
-    expect(root.getByText('https://example.com'));
+    expect(root.getByText('https://example.com')).toBeTruthy();
   });
 
   it('renders informative audit count if any', async () => {
@@ -127,7 +124,7 @@ describe('SummaryTooltip', () => {
     expect(root.getByText('2 audits passed')).toBeTruthy();
     expect(root.getByText('2 passable audits')).toBeTruthy();
     expect(root.getByText('1 informative audit')).toBeTruthy();
-    expect(root.getByText('https://example.com'));
+    expect(root.getByText('https://example.com')).toBeTruthy();
   });
 
   it('renders highest impact audits', async () => {
@@ -192,7 +189,7 @@ describe('SummaryTooltip', () => {
       auditRefs: [
         /* eslint-disable max-len */
         {result: {score: 1, scoreDisplayMode: 'binary', title: 'Audit 1'}, weight: 1, group: 'diagnostics'},
-        {result: {score: 0, scoreDisplayMode: 'binary', title: 'Audit 2'}, weight: 1},
+        {result: {score: 0, scoreDisplayMode: 'binary', title: 'Audit 2'}, weight: 1, group: 'hidden'},
         {result: {score: null, scoreDisplayMode: 'informative', title: 'Audit 3'}, weight: 1, group: 'diagnostics'},
         /* eslint-enable max-len */
       ],

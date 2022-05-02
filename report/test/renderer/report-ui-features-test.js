@@ -3,13 +3,13 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
 
 /* eslint-env jest */
 
 import {strict as assert} from 'assert';
 
 import jsdom from 'jsdom';
+import {jest} from '@jest/globals';
 
 import reportAssets from '../../generator/report-assets.js';
 import {Util} from '../../renderer/util.js';
@@ -26,20 +26,23 @@ describe('ReportUIFeatures', () => {
 
   /**
    * @param {LH.JSON} lhr
+   * @param {LH.Renderer.Options=} opts
    * @return {HTMLElement}
    */
-  function render(lhr) {
+  function render(lhr, opts) {
     const detailsRenderer = new DetailsRenderer(dom);
     const categoryRenderer = new CategoryRenderer(dom, detailsRenderer);
     const renderer = new ReportRenderer(dom, categoryRenderer);
-    const reportUIFeatures = new ReportUIFeatures(dom);
-    const container = dom.find('main', dom._document);
-    renderer.renderReport(lhr, container);
+    const reportUIFeatures = new ReportUIFeatures(dom, opts);
+    const container = dom.find('body', dom.document());
+    renderer.renderReport(lhr, container, opts);
     reportUIFeatures.initFeatures(lhr);
     return container;
   }
 
   beforeAll(() => {
+    global.console.warn = jest.fn();
+
     // Stub out matchMedia for Node.
     global.matchMedia = function() {
       return {
@@ -57,13 +60,19 @@ describe('ReportUIFeatures', () => {
 
     global.HTMLElement = document.window.HTMLElement;
     global.HTMLInputElement = document.window.HTMLInputElement;
+    global.CustomEvent = document.window.CustomEvent;
 
     global.window = document.window;
+    global.window.requestAnimationFrame = fn => fn();
     global.window.getComputedStyle = function() {
       return {
         marginTop: '10px',
         height: '10px',
       };
+    };
+    global.window.ResizeObserver = class ResizeObserver {
+      observe() { }
+      unobserve() { }
     };
 
     dom = new DOM(document.window.document);
@@ -75,6 +84,7 @@ describe('ReportUIFeatures', () => {
     global.window = undefined;
     global.HTMLElement = undefined;
     global.HTMLInputElement = undefined;
+    global.CustomEvent = undefined;
   });
 
   describe('initFeatures', () => {
@@ -256,18 +266,32 @@ describe('ReportUIFeatures', () => {
           .toThrowError('query #uses-rel-preconnect .lh-3p-filter-input not found');
       });
 
-      it('filter is disabled and checked for when just third party resources', () => {
-        const filterCheckbox =
-          dom.find('#render-blocking-resources .lh-3p-filter-input', container);
-        expect(filterCheckbox.disabled).toEqual(true);
-        expect(filterCheckbox.checked).toEqual(true);
+      it('filter is hidden when just third party resources', () => {
+        const filterControl =
+          dom.find('#render-blocking-resources .lh-3p-filter', container);
+        expect(filterControl.hidden).toEqual(true);
       });
 
-      it('filter is disabled and not checked for just first party resources', () => {
-        const filterCheckbox = dom.find('#uses-text-compression .lh-3p-filter-input', container);
-        expect(filterCheckbox.disabled).toEqual(true);
-        expect(filterCheckbox.checked).toEqual(false);
+      it('filter is hidden for just first party resources', () => {
+        const filterControl = dom.find('#uses-text-compression .lh-3p-filter', container);
+        expect(filterControl.hidden).toEqual(true);
       });
+    });
+
+    it('save-html option enabled if callback present', () => {
+      let container = render(sampleResults);
+      const getSaveEl = () => dom.find('a[data-action="save-html"]', container);
+      expect(getSaveEl().classList.contains('lh-hidden')).toBeTruthy();
+
+      const getHtmlMock = jest.fn();
+      container = render(sampleResults, {
+        getStandaloneReportHTML: getHtmlMock,
+      });
+      expect(getSaveEl().classList.contains('lh-hidden')).toBeFalsy();
+
+      expect(getHtmlMock).not.toBeCalled();
+      getSaveEl().click();
+      expect(getHtmlMock).toBeCalled();
     });
   });
 
@@ -344,7 +368,6 @@ describe('ReportUIFeatures', () => {
       dropDown._toggleEl.click();
       assert.ok(!dropDown._toggleEl.classList.contains('lh-active'));
     });
-
 
     it('Escape key removes active class', () => {
       dropDown._toggleEl.click();
@@ -515,6 +538,9 @@ describe('ReportUIFeatures', () => {
       expect(render(lhr).querySelector('.lh-button.lh-report-icon--treemap')).toBeTruthy();
 
       delete lhr.audits['script-treemap-data'];
+      const newAuditRefs = lhr.categories['performance'].auditRefs
+        .filter(a => a.id !== 'script-treemap-data');
+      lhr.categories['performance'].auditRefs = newAuditRefs;
       expect(render(lhr).querySelector('.lh-button.lh-report-icon--treemap')).toBeNull();
     });
   });

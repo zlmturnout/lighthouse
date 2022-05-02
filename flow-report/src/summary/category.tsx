@@ -64,8 +64,8 @@ const SummaryTooltipAudits: FunctionComponent<{category: LH.ReportResult.Categor
     return audit.result.score !== null &&
       // Metrics should not be displayed in this group.
       audit.group !== 'metrics' &&
-      // Audits in performance without a group are hidden.
-      (audit.group !== undefined || category.id !== 'performance') &&
+      // Audits in performance group "hidden" should not be counted.
+      (audit.group !== 'hidden' || category.id !== 'performance') &&
       // We don't want unweighted audits except for opportunities with potential savings.
       (audit.weight > 0 || getOverallSavings(audit) > 0) &&
       // Passing audits should never be high impact.
@@ -95,7 +95,7 @@ const SummaryTooltipAudits: FunctionComponent<{category: LH.ReportResult.Categor
   );
 };
 
-export const SummaryTooltip: FunctionComponent<{
+const SummaryTooltip: FunctionComponent<{
   category: LH.ReportResult.Category,
   gatherMode: LH.Result.GatherMode,
   url: string,
@@ -132,7 +132,7 @@ export const SummaryTooltip: FunctionComponent<{
               {
                 !displayAsFraction && category.score !== null && <>
                   <span> · </span>
-                  <span>{i18n.formatNumber(category.score * 100)}</span>
+                  <span>{i18n.formatInteger(category.score * 100)}</span>
                 </>
               }
             </div>
@@ -153,7 +153,7 @@ export const SummaryTooltip: FunctionComponent<{
   );
 };
 
-export const SummaryCategory: FunctionComponent<{
+const SummaryCategory: FunctionComponent<{
   category: LH.ReportResult.Category|undefined,
   href: string,
   gatherMode: LH.Result.GatherMode,
@@ -175,4 +175,9 @@ export const SummaryCategory: FunctionComponent<{
       }
     </div>
   );
+};
+
+export {
+  SummaryTooltip,
+  SummaryCategory,
 };

@@ -71,7 +71,7 @@ class GatherRunner {
     log.time(status);
     try {
       const requestedUrl = passContext.url;
-      const {finalUrl, warnings} = await navigation.gotoURL(driver, requestedUrl, {
+      const {mainDocumentUrl, warnings} = await navigation.gotoURL(driver, requestedUrl, {
         waitUntil: passContext.passConfig.recordTrace ?
           ['load', 'fcp'] : ['load'],
         debugNavigation: passContext.settings.debugNavigation,
@@ -79,7 +79,12 @@ class GatherRunner {
         maxWaitForLoad: passContext.settings.maxWaitForLoad,
         ...passContext.passConfig,
       });
-      passContext.url = finalUrl;
+      passContext.url = mainDocumentUrl;
+      const {URL} = passContext.baseArtifacts;
+      if (!URL.finalUrl || !URL.mainDocumentUrl) {
+        URL.finalUrl = mainDocumentUrl;
+        URL.mainDocumentUrl = mainDocumentUrl;
+      }
       if (passContext.passConfig.loadFailureMode === 'fatal') {
         passContext.LighthouseRunWarnings.push(...warnings);
       }
@@ -407,7 +412,12 @@ class GatherRunner {
       devtoolsLogs: {},
       settings: options.settings,
       GatherContext: {gatherMode: 'navigation'},
-      URL: {requestedUrl: options.requestedUrl, finalUrl: options.requestedUrl},
+      URL: {
+        initialUrl: await options.driver.url(),
+        requestedUrl: options.requestedUrl,
+        mainDocumentUrl: '',
+        finalUrl: '',
+      },
       Timing: [],
       PageLoadError: null,
     };
@@ -422,21 +432,39 @@ class GatherRunner {
   static async populateBaseArtifacts(passContext) {
     const status = {msg: 'Populate base artifacts', id: 'lh:gather:populateBaseArtifacts'};
     log.time(status);
+
     const baseArtifacts = passContext.baseArtifacts;
 
-    // Copy redirected URL to artifact.
-    baseArtifacts.URL.finalUrl = passContext.url;
-
     // Fetch the manifest, if it exists.
-    baseArtifacts.WebAppManifest = await WebAppManifest.getWebAppManifest(
-      passContext.driver.defaultSession, passContext.url);
-
-    if (baseArtifacts.WebAppManifest) {
-      baseArtifacts.InstallabilityErrors = await InstallabilityErrors.getInstallabilityErrors(
-        passContext.driver.defaultSession);
+    try {
+      baseArtifacts.WebAppManifest = await WebAppManifest.getWebAppManifest(
+        passContext.driver.defaultSession, passContext.url);
+    } catch (err) {
+      log.error('GatherRunner WebAppManifest', err);
+      baseArtifacts.WebAppManifest = null;
     }
 
-    baseArtifacts.Stacks = await Stacks.collectStacks(passContext.driver.executionContext);
+    try {
+      baseArtifacts.InstallabilityErrors = await InstallabilityErrors.getInstallabilityErrors(
+        passContext.driver.defaultSession);
+    } catch (err) {
+      log.error('GatherRunner InstallabilityErrors', err);
+      baseArtifacts.InstallabilityErrors = {
+        errors: [
+          {
+            errorId: 'protocol-timeout',
+            errorArguments: [],
+          },
+        ],
+      };
+    }
+
+    try {
+      baseArtifacts.Stacks = await Stacks.collectStacks(passContext.driver.executionContext);
+    } catch (err) {
+      log.error('GatherRunner Stacks', err);
+      baseArtifacts.Stacks = [];
+    }
 
     // Find the NetworkUserAgent actually used in the devtoolsLogs.
     const devtoolsLog = baseArtifacts.devtoolsLogs[passContext.passConfig.passName];
@@ -549,7 +577,7 @@ class GatherRunner {
       driver.defaultSession,
       passContext.settings,
       {
-        url: passContext.url,
+        requestor: passContext.url,
         disableStorageReset: !passConfig.useThrottling,
         disableThrottling: !passConfig.useThrottling,
         blockedUrlPatterns: passConfig.blockedUrlPatterns,

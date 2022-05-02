@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 /** @typedef {import('./dom.js').DOM} DOM */
 /** @typedef {import('./report-renderer.js').ReportRenderer} ReportRenderer */
@@ -133,7 +132,7 @@ export class CategoryRenderer {
     const warningsEl = this.dom.createChildOf(summaryEl, 'div', 'lh-warnings');
     this.dom.createChildOf(warningsEl, 'span').textContent = strings.warningHeader;
     if (warnings.length === 1) {
-      warningsEl.appendChild(this.dom.document().createTextNode(warnings.join('')));
+      warningsEl.appendChild(this.dom.createTextNode(warnings.join('')));
     } else {
       const warningsUl = this.dom.createChildOf(warningsEl, 'ul');
       for (const warning of warnings) {
@@ -222,7 +221,7 @@ export class CategoryRenderer {
    * Renders the group container for a group of audits. Individual audit elements can be added
    * directly to the returned element.
    * @param {LH.Result.ReportGroup} group
-   * @return {Element}
+   * @return {[Element, Element | null]}
    */
   renderAuditGroup(group) {
     const groupEl = this.dom.createElement('div', 'lh-audit-group');
@@ -231,14 +230,16 @@ export class CategoryRenderer {
 
     this.dom.createChildOf(auditGroupHeader, 'span', 'lh-audit-group__title')
       .textContent = group.title;
-    if (group.description) {
-      const descriptionEl = this.dom.convertMarkdownLinkSnippets(group.description);
-      descriptionEl.classList.add('lh-audit-group__description');
-      auditGroupHeader.appendChild(descriptionEl);
-    }
     groupEl.appendChild(auditGroupHeader);
 
-    return groupEl;
+    let footerEl = null;
+    if (group.description) {
+      footerEl = this.dom.convertMarkdownLinkSnippets(group.description);
+      footerEl.classList.add('lh-audit-group__description', 'lh-audit-group__footer');
+      groupEl.appendChild(footerEl);
+    }
+
+    return [groupEl, footerEl];
   }
 
   /**
@@ -278,9 +279,9 @@ export class CategoryRenderer {
 
       // Push grouped audits as a group.
       const groupDef = groupDefinitions[groupId];
-      const auditGroupElem = this.renderAuditGroup(groupDef);
+      const [auditGroupElem, auditGroupFooterEl] = this.renderAuditGroup(groupDef);
       for (const auditRef of groupAuditRefs) {
-        auditGroupElem.appendChild(this.renderAudit(auditRef));
+        auditGroupElem.insertBefore(this.renderAudit(auditRef), auditGroupFooterEl);
       }
       auditGroupElem.classList.add(`lh-audit-group--${groupId}`);
       auditElements.push(auditGroupElem);
@@ -318,17 +319,9 @@ export class CategoryRenderer {
       clumpElement.setAttribute('open', '');
     }
 
-    const summaryInnerEl = this.dom.find('div.lh-audit-group__summary', clumpElement);
-    summaryInnerEl.appendChild(this._createChevron());
-
     const headerEl = this.dom.find('.lh-audit-group__header', clumpElement);
     const title = this._clumpTitles[clumpId];
     this.dom.find('.lh-audit-group__title', headerEl).textContent = title;
-    if (description) {
-      const descriptionEl = this.dom.convertMarkdownLinkSnippets(description);
-      descriptionEl.classList.add('lh-audit-group__description');
-      headerEl.appendChild(descriptionEl);
-    }
 
     const itemCountEl = this.dom.find('.lh-audit-group__itemcount', clumpElement);
     itemCountEl.textContent = `(${auditRefs.length})`;
@@ -337,21 +330,45 @@ export class CategoryRenderer {
     const auditElements = auditRefs.map(this.renderAudit.bind(this));
     clumpElement.append(...auditElements);
 
+    const el = this.dom.find('.lh-audit-group', clumpComponent);
+    if (description) {
+      const descriptionEl = this.dom.convertMarkdownLinkSnippets(description);
+      descriptionEl.classList.add('lh-audit-group__description', 'lh-audit-group__footer');
+      el.appendChild(descriptionEl);
+    }
+
+    this.dom.find('.lh-clump-toggletext--show', el).textContent = Util.i18n.strings.show;
+    this.dom.find('.lh-clump-toggletext--hide', el).textContent = Util.i18n.strings.hide;
+
     clumpElement.classList.add(`lh-clump--${clumpId.toLowerCase()}`);
-    return clumpElement;
+    return el;
   }
 
   /**
    * @param {LH.ReportResult.Category} category
    * @param {Record<string, LH.Result.ReportGroup>} groupDefinitions
-   * @param {{gatherMode: LH.Result.GatherMode}=} options
+   * @param {{gatherMode: LH.Result.GatherMode, omitLabel?: boolean, onPageAnchorRendered?: (link: HTMLAnchorElement) => void}=} options
    * @return {DocumentFragment}
    */
   renderCategoryScore(category, groupDefinitions, options) {
+    let categoryScore;
     if (options && Util.shouldDisplayAsFraction(options.gatherMode)) {
-      return this.renderCategoryFraction(category);
+      categoryScore = this.renderCategoryFraction(category);
+    } else {
+      categoryScore = this.renderScoreGauge(category, groupDefinitions);
     }
-    return this.renderScoreGauge(category, groupDefinitions);
+
+    if (options?.omitLabel) {
+      const label = this.dom.find('.lh-gauge__label,.lh-fraction__label', categoryScore);
+      label.remove();
+    }
+
+    if (options?.onPageAnchorRendered) {
+      const anchor = this.dom.find('a', categoryScore);
+      options.onPageAnchorRendered(anchor);
+    }
+
+    return categoryScore;
   }
 
   /**
@@ -462,7 +479,7 @@ export class CategoryRenderer {
    * @return {boolean}
    */
   _auditHasWarning(audit) {
-    return Boolean(audit.result.warnings && audit.result.warnings.length);
+    return Boolean(audit.result.warnings?.length);
   }
 
   /**
@@ -530,6 +547,13 @@ export class CategoryRenderer {
       const clump = /** @type {Array<LH.ReportResult.AuditRef>} */ (clumps.get(clumpId)); // already defined
       clump.push(auditRef);
       clumps.set(clumpId, clump);
+    }
+
+    // Sort audits by weight.
+    for (const auditRefs of clumps.values()) {
+      auditRefs.sort((a, b) => {
+        return b.weight - a.weight;
+      });
     }
 
     // Render each clump.

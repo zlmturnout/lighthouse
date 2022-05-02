@@ -6,23 +6,27 @@
 'use strict';
 
 const legacyDefaultConfig = require('../../config/default-config.js');
+const {deepClone} = require('../../config/config-helpers.js');
 
 /** @type {LH.Config.AuditJson[]} */
 const frAudits = [
   'byte-efficiency/uses-responsive-images-snapshot',
+  'metrics/experimental-interaction-to-next-paint',
 ];
 
 /** @type {Record<string, LH.Config.AuditRefJson[]>} */
 const frCategoryAuditRefExtensions = {
   'performance': [
-    {id: 'uses-responsive-images-snapshot', weight: 0, group: 'diagnostics'},
+    {id: 'uses-responsive-images-snapshot', weight: 0},
+    {id: 'experimental-interaction-to-next-paint', weight: 0, group: 'metrics', acronym: 'INP'},
   ],
 };
 
 /** @return {LH.Config.Json['categories']} */
 function mergeCategories() {
   if (!legacyDefaultConfig.categories) return {};
-  const categories = legacyDefaultConfig.categories;
+  // Don't modify original default config.
+  const categories = deepClone(legacyDefaultConfig.categories);
   for (const key of Object.keys(frCategoryAuditRefExtensions)) {
     if (!categories[key]) continue;
     categories[key].auditRefs.push(...frCategoryAuditRefExtensions[key]);
@@ -37,7 +41,6 @@ const artifacts = {
   Trace: '',
   Accessibility: '',
   AnchorElements: '',
-  AppCacheManifest: '',
   CacheContents: '',
   ConsoleMessages: '',
   CSSUsage: '',
@@ -45,7 +48,7 @@ const artifacts = {
   DOMStats: '',
   EmbeddedContent: '',
   FontSize: '',
-  FormElements: '',
+  Inputs: '',
   FullPageScreenshot: '',
   GlobalListeners: '',
   IFrameElements: '',
@@ -63,6 +66,7 @@ const artifacts = {
   RobotsTxt: '',
   ServiceWorker: '',
   ScriptElements: '',
+  Scripts: '',
   SourceMaps: '',
   Stacks: '',
   TagsBlockingFirstPaint: '',
@@ -88,7 +92,6 @@ const defaultConfig = {
     /* eslint-disable max-len */
     {id: artifacts.Accessibility, gatherer: 'accessibility'},
     {id: artifacts.AnchorElements, gatherer: 'anchor-elements'},
-    {id: artifacts.AppCacheManifest, gatherer: 'dobetterweb/appcache'},
     {id: artifacts.CacheContents, gatherer: 'cache-contents'},
     {id: artifacts.ConsoleMessages, gatherer: 'console-messages'},
     {id: artifacts.CSSUsage, gatherer: 'css-usage'},
@@ -96,7 +99,7 @@ const defaultConfig = {
     {id: artifacts.DOMStats, gatherer: 'dobetterweb/domstats'},
     {id: artifacts.EmbeddedContent, gatherer: 'seo/embedded-content'},
     {id: artifacts.FontSize, gatherer: 'seo/font-size'},
-    {id: artifacts.FormElements, gatherer: 'form-elements'},
+    {id: artifacts.Inputs, gatherer: 'inputs'},
     {id: artifacts.FullPageScreenshot, gatherer: 'full-page-screenshot'},
     {id: artifacts.GlobalListeners, gatherer: 'global-listeners'},
     {id: artifacts.IFrameElements, gatherer: 'iframe-elements'},
@@ -114,6 +117,7 @@ const defaultConfig = {
     {id: artifacts.RobotsTxt, gatherer: 'seo/robots-txt'},
     {id: artifacts.ServiceWorker, gatherer: 'service-worker'},
     {id: artifacts.ScriptElements, gatherer: 'script-elements'},
+    {id: artifacts.Scripts, gatherer: 'scripts'},
     {id: artifacts.SourceMaps, gatherer: 'source-maps'},
     {id: artifacts.Stacks, gatherer: 'stacks'},
     {id: artifacts.TagsBlockingFirstPaint, gatherer: 'dobetterweb/tags-blocking-first-paint'},
@@ -141,7 +145,6 @@ const defaultConfig = {
 
         artifacts.Accessibility,
         artifacts.AnchorElements,
-        artifacts.AppCacheManifest,
         artifacts.CacheContents,
         artifacts.ConsoleMessages,
         artifacts.CSSUsage,
@@ -149,7 +152,7 @@ const defaultConfig = {
         artifacts.DOMStats,
         artifacts.EmbeddedContent,
         artifacts.FontSize,
-        artifacts.FormElements,
+        artifacts.Inputs,
         artifacts.GlobalListeners,
         artifacts.IFrameElements,
         artifacts.ImageElements,
@@ -166,6 +169,7 @@ const defaultConfig = {
         artifacts.RobotsTxt,
         artifacts.ServiceWorker,
         artifacts.ScriptElements,
+        artifacts.Scripts,
         artifacts.SourceMaps,
         artifacts.Stacks,
         artifacts.TagsBlockingFirstPaint,

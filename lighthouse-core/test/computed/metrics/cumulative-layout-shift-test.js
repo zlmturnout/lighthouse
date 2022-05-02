@@ -298,13 +298,12 @@ describe('Metrics: CLS', () => {
 
       it('ignores layout shift data from other tabs', async () => {
         const trace = createTestTrace({timeOrigin: 0, traceEnd: 2000});
-        const mainFrame = trace.traceEvents[0].args.frame;
+        const mainFrame = trace.traceEvents.find(e => e.name === 'navigationStart').args.frame;
         const childFrame = 'CHILDFRAME';
         const otherMainFrame = 'ANOTHERTABOPEN';
         const cat = 'loading,rail,devtools.timeline';
         trace.traceEvents.push(
           /* eslint-disable max-len */
-          {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: mainFrame, url: 'https://example.com'}}},
           {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: childFrame, parent: mainFrame, url: 'https://frame.com'}}},
           {name: 'FrameCommittedInBrowser', cat, args: {data: {frame: otherMainFrame, url: 'https://example.com'}}},
           {name: 'LayoutShift', cat, args: {frame: mainFrame, data: {had_recent_input: false, score: 1, weighted_score_delta: 1, is_main_frame: true}}},

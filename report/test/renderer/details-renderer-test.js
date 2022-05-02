@@ -3,7 +3,6 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
 
 import {strict as assert} from 'assert';
 
@@ -85,6 +84,55 @@ describe('DetailsRenderer', () => {
       assert.equal(el.querySelectorAll('.lh-table-column--text').length, 6, '--text not set');
       assert.equal(el.querySelectorAll('.lh-table-column--thumbnail').length, 3,
           '--thumbnail not set');
+    });
+
+    it('renders with default granularity', () => {
+      const el = renderer.render({
+        type: 'table',
+        headings: [
+          {text: '', key: 'bytes', itemType: 'bytes'},
+          {text: '', key: 'numeric', itemType: 'numeric'},
+          {text: '', key: 'ms', itemType: 'ms'},
+          // Verify that 0 is ignored.
+          {text: '', key: 'ms', itemType: 'ms', granularity: 0},
+        ],
+        items: [
+          {
+            bytes: 1234.567,
+            numeric: 1234.567,
+            ms: 1234.567,
+          },
+        ],
+      });
+
+      assert.equal(el.querySelectorAll('td').length, 4, 'did not render table cells');
+      assert.equal(el.querySelectorAll('td')[0].textContent, '1.2\xa0KiB');
+      assert.equal(el.querySelectorAll('td')[1].textContent, '1,234.6');
+      assert.equal(el.querySelectorAll('td')[2].textContent, '1,230\xa0ms');
+      assert.equal(el.querySelectorAll('td')[3].textContent, '1,230\xa0ms');
+    });
+
+    it('renders with custom granularity', () => {
+      const el = renderer.render({
+        type: 'table',
+        headings: [
+          {text: '', key: 'bytes', itemType: 'bytes', granularity: 0.01},
+          {text: '', key: 'numeric', itemType: 'numeric', granularity: 100},
+          {text: '', key: 'ms', itemType: 'ms', granularity: 1},
+        ],
+        items: [
+          {
+            bytes: 1234.567,
+            numeric: 1234.567,
+            ms: 1234.567,
+          },
+        ],
+      });
+
+      assert.equal(el.querySelectorAll('td').length, 3, 'did not render table cells');
+      assert.equal(el.querySelectorAll('td')[0].textContent, '1.21\xa0KiB');
+      assert.equal(el.querySelectorAll('td')[1].textContent, '1,200');
+      assert.equal(el.querySelectorAll('td')[2].textContent, '1,235\xa0ms');
     });
 
     it('renders critical request chains', () => {

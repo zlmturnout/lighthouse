@@ -14,7 +14,7 @@ const DEFAULT_PROTOCOL_TIMEOUT = 30000;
 /** @implements {LH.Gatherer.FRProtocolSession} */
 class ProtocolSession {
   /**
-   * @param {import('puppeteer').CDPSession} session
+   * @param {LH.Puppeteer.CDPSession} session
    */
   constructor(session) {
     this._session = session;
@@ -93,7 +93,7 @@ class ProtocolSession {
    * @param {(session: ProtocolSession) => void} callback
    */
   addSessionAttachedListener(callback) {
-    /** @param {import('puppeteer').CDPSession} session */
+    /** @param {LH.Puppeteer.CDPSession} session */
     const listener = session => callback(new ProtocolSession(session));
     this._callbackMap.set(callback, listener);
     this._session.connection().on('sessionattached', listener);
@@ -150,10 +150,9 @@ class ProtocolSession {
     const timeoutPromise = new Promise((resolve, reject) => {
       if (timeoutMs === Infinity) return;
 
-      timeout = setTimeout((() => {
-        const err = new LHError(LHError.errors.PROTOCOL_TIMEOUT, {protocolMethod: method});
-        reject(err);
-      }), timeoutMs);
+      timeout = setTimeout(reject, timeoutMs, new LHError(LHError.errors.PROTOCOL_TIMEOUT, {
+        protocolMethod: method,
+      }));
     });
 
     const resultPromise = this._session.send(method, ...params);
