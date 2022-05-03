@@ -104,9 +104,9 @@ jobs:
         name: Smokehouse (windows)
         path: .tmp/smokehouse-ci-failures/
 
-  smoke-fr:
+  smoke-legacy:
     runs-on: ubuntu-latest
-    name: Fraggle Rock
+    name: Legacy Navigation
 
     steps:
     - name: git clone
@@ -122,8 +122,8 @@ jobs:
     - run: yarn reset-link
 
     - run: sudo apt-get install xvfb
-    - name: yarn smoke --fraggle-rock
-      run: xvfb-run --auto-servernum yarn smoke --debug --fraggle-rock -j=1 --retries=2
+    - name: yarn smoke --legacy-navigation
+      run: xvfb-run --auto-servernum yarn smoke --debug --legacy-navigation -j=1 --retries=2
 
     # Fail if any changes were written to source files.
     - run: git diff --exit-code
@@ -132,7 +132,7 @@ jobs:
       if: failure()
       uses: actions/upload-artifact@v1
       with:
-        name: Smokehouse (fr)
+        name: Smokehouse (legacy)
         path: .tmp/smokehouse-ci-failures/
 
   smoke-bundle:
@@ -166,9 +166,9 @@ jobs:
         name: Smokehouse (bundled)
         path: .tmp/smokehouse-ci-failures/
 
-  smoke-bundle-fr:
+  smoke-bundle-legacy:
     runs-on: ubuntu-latest
-    name: Bundled Fraggle Rock
+    name: Bundled Legacy Navigation
 
     steps:
     - name: git clone
@@ -185,7 +185,7 @@ jobs:
 
     - run: sudo apt-get install xvfb
     - name: yarn test-bundle
-      run: xvfb-run --auto-servernum yarn test-bundle --fraggle-rock
+      run: xvfb-run --auto-servernum yarn test-bundle --legacy-navigation
 
     # Fail if any changes were written to source files.
     - run: git diff --exit-code
