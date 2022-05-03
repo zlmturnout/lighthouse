@@ -5,10 +5,9 @@
  */
 'use strict';
 
-const assert = require('assert').strict;
-
-const Interactive = require('../../../computed/metrics/interactive.js');
-const {getURLArtifactFromDevtoolsLog, loadTraceFixture} = require('../../test-utils.js');
+import Interactive from '../../../computed/metrics/interactive.js';
+import {strict as assert} from 'assert';
+import {getURLArtifactFromDevtoolsLog, loadTraceFixture} from '../../test-utils.js';
 
 const {trace, devtoolsLog} = loadTraceFixture('progressive-app-m60');
 const URL = getURLArtifactFromDevtoolsLog(devtoolsLog);
