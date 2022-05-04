@@ -8,7 +8,7 @@
 const path = require('path');
 const log = require('lighthouse-logger');
 const Runner = require('../../runner.js');
-const defaultConfig = require('./default-config.js');
+const defaultConfig = require('../../config/default-config.js');
 const {defaultNavigationConfig, nonSimulatedPassConfigOverrides} = require('../../config/constants.js'); // eslint-disable-line max-len
 const {
   isFRGathererDefn,

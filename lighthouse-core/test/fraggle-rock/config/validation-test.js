@@ -6,7 +6,7 @@
 'use strict';
 
 const {defaultSettings, defaultNavigationConfig} = require('../../../config/constants.js');
-const defaultConfig = require('../../../fraggle-rock/config/default-config.js');
+const defaultConfig = require('../../../config/default-config.js');
 const BaseAudit = require('../../../audits/audit.js');
 const BaseFRGatherer = require('../../../fraggle-rock/gather/base-gatherer.js');
 const BaseLegacyGatherer = require('../../../gather/gatherers/gatherer.js');
