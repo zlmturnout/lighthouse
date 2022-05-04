@@ -135,17 +135,15 @@ function mockCSP(details) {
 }
 
 /**
- * @param {string} text
+ * @param {LH.Crdp.Audits.DeprecationIssueType} type
  * @return {LH.Crdp.Audits.InspectorIssue}
  */
-function mockDeprecation(text) {
+function mockDeprecation(type) {
   return {
     code: 'DeprecationIssue',
     details: {
       deprecationIssueDetails: {
-        message: text,
-        deprecationType: 'test',
-        type: 'Untranslated',
+        type,
         sourceCodeLocation: {
           url: 'https://www.example.com',
           lineNumber: 10,
@@ -190,7 +188,7 @@ describe('_getArtifact', () => {
       mockBlockedByResponse({request: {requestId: '3'}}),
       mockHeavyAd(),
       mockCSP(),
-      mockDeprecation('some warning'),
+      mockDeprecation('AuthorizationCoveredByWildcard'),
     ];
     const networkRecords = [
       mockRequest({requestId: '1'}),
@@ -235,14 +233,12 @@ describe('_getArtifact', () => {
         contentSecurityPolicyViolationType: 'kInlineViolation',
       }],
       deprecationIssue: [{
-        message: 'some warning',
-        deprecationType: 'test',
+        type: 'AuthorizationCoveredByWildcard',
         sourceCodeLocation: {
           url: 'https://www.example.com',
           columnNumber: 10,
           lineNumber: 10,
         },
-        type: 'Untranslated',
       }],
       attributionReportingIssue: [],
       clientHintIssue: [],
