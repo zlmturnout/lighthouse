@@ -5,11 +5,11 @@
  */
 'use strict';
 
+/* eslint-disable max-len */
+
+const constants = require('../config/constants.js');
 const i18n = require('../lib/i18n/i18n.js');
 const m2a = require('../config/metrics-to-audits.js');
-const constants = require('../config/constants.js');
-
-/* eslint-disable max-len */
 
 const UIStrings = {
   /** Title of the Performance category of audits. Equivalent to 'Web performance', this term is inclusive of all web page speed and loading optimization topics. Also used as a label of a score gauge; try to limit to 20 characters. */
