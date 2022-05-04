@@ -6,7 +6,7 @@
 'use strict';
 
 import {defaultSettings, defaultNavigationConfig} from '../../../config/constants.js';
-import defaultConfig from '../../../fraggle-rock/config/default-config.js';
+import defaultConfig from '../../../config/default-config.js';
 import BaseAudit from '../../../audits/audit.js';
 import BaseFRGatherer from '../../../fraggle-rock/gather/base-gatherer.js';
 import BaseLegacyGatherer from '../../../gather/gatherers/gatherer.js';

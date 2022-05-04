@@ -5,8 +5,8 @@
  */
 'use strict';
 
-const defaultConfigPath = './default-config.js';
-const defaultConfig = require('./default-config.js');
+const defaultConfigPath = './legacy-default-config.js';
+const defaultConfig = require('./legacy-default-config.js');
 const constants = require('./constants.js');
 const format = require('../../shared/localization/format.js');
 const validation = require('./../fraggle-rock/config/validation.js');

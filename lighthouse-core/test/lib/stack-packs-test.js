@@ -11,10 +11,10 @@ import lighthouseStackPacksDep from 'lighthouse-stack-packs';
 
 import stackPacksLib from '../../lib/stack-packs.js';
 import defaultConfig from '../../config/default-config.js';
-import Config from '../../config/config.js';
+import {initializeConfig} from '../../fraggle-rock/config/config.js';
 
 function getAuditIds() {
-  const config = new Config(defaultConfig);
+  const {config} = initializeConfig(defaultConfig, {gatherMode: 'navigation'});
   return config.audits.map(a => a.implementation.meta.id);
 }
 
