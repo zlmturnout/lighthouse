@@ -53,7 +53,7 @@ jobs:
     - run: sudo apt-get install xvfb
     - name: Run smoke tests
       run: |
-        xvfb-run --auto-servernum yarn c8 yarn smoke --debug -j=1 --retries=2 --shard=${{ matrix.smoke-test-shard }}/$SHARD_TOTAL
+        xvfb-run --auto-servernum yarn c8 yarn smoke --debug -j=2 --retries=2 --shard=${{ matrix.smoke-test-shard }}/$SHARD_TOTAL
         yarn c8 report --reporter text-lcov > smoke-coverage.lcov
 
     - name: Upload test coverage to Codecov
@@ -97,7 +97,7 @@ jobs:
 
     - name: Run smoke tests
       # Windows bots are slow, so only run enough tests to verify matching behavior.
-      run: yarn smoke --debug -j=1 --retries=2 --shard=${{ matrix.smoke-test-shard }}/2 dbw oopif offline lantern metrics
+      run: yarn smoke --debug -j=2 --retries=2 --shard=${{ matrix.smoke-test-shard }}/2 dbw oopif offline lantern metrics
 
     # Fail if any changes were written to source files.
     - run: git diff --exit-code
@@ -137,7 +137,7 @@ jobs:
 
     - run: sudo apt-get install xvfb
     - name: yarn smoke --fraggle-rock
-      run: xvfb-run --auto-servernum yarn smoke --debug --fraggle-rock -j=1 --retries=2 --shard=${{ matrix.smoke-test-shard }}/$SHARD_TOTAL
+      run: xvfb-run --auto-servernum yarn smoke --debug --fraggle-rock -j=2 --retries=2 --shard=${{ matrix.smoke-test-shard }}/$SHARD_TOTAL
 
     # Fail if any changes were written to source files.
     - run: git diff --exit-code
