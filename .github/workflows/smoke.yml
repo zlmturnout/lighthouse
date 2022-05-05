@@ -81,10 +81,6 @@ jobs:
       # e.g. if set 1 fails, continue with set 2 anyway
       fail-fast: false
     runs-on: windows-latest
-    env:
-      # The total number of shards. Set dynamically when length of *single* matrix variable is
-      # computable. See https://github.community/t/get-length-of-strategy-matrix-or-get-all-matrix-options/18342
-      SHARD_TOTAL: 2
     name: Windows smoke ${{ matrix.smoke-test-shard }}/2
 
     steps:
@@ -101,7 +97,7 @@ jobs:
 
     - name: Run smoke tests
       # Windows bots are slow, so only run enough tests to verify matching behavior.
-      run: yarn smoke --debug -j=1 --retries=2 --shard=${{ matrix.smoke-test-shard }}/$SHARD_TOTAL dbw oopif offline lantern metrics
+      run: yarn smoke --debug -j=1 --retries=2 --shard=${{ matrix.smoke-test-shard }}/2 dbw oopif offline lantern metrics
 
     # Fail if any changes were written to source files.
     - run: git diff --exit-code
