@@ -120,7 +120,7 @@ jobs:
       # The total number of shards. Set dynamically when length of *single* matrix variable is
       # computable. See https://github.community/t/get-length-of-strategy-matrix-or-get-all-matrix-options/18342
       SHARD_TOTAL: 3
-    name: ${{ matrix.smoke-test-shard }}/3
+    name: Fraggle Rock ${{ matrix.smoke-test-shard }}/3
 
     steps:
     - name: git clone
