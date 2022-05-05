@@ -34,8 +34,6 @@ class CustomGatherer extends Gatherer {
     const value = await executionContext.evaluateAsync(`document.querySelector('input').value`);
     if (value !== '123') throw new Error('huh?');
 
-    // Don't close the browser page, it can be used by Lighthouse later.
-
     return {value};
   }
 }
