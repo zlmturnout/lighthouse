@@ -7,12 +7,14 @@
 
 /* eslint-env jest */
 
-const assert = require('assert').strict;
-const CriticalRequestChains = require('../../computed/critical-request-chains.js');
-const NetworkRequest = require('../../lib/network-request.js');
-const createTestTrace = require('../create-test-trace.js');
-const networkRecordsToDevtoolsLog = require('../network-records-to-devtools-log.js');
-const {getURLArtifactFromDevtoolsLog} = require('../test-utils.js');
+import {strict as assert} from 'assert';
+
+import CriticalRequestChains from '../../computed/critical-request-chains.js';
+import NetworkRequest from '../../lib/network-request.js';
+import createTestTrace from '../create-test-trace.js';
+import networkRecordsToDevtoolsLog from '../network-records-to-devtools-log.js';
+import {getURLArtifactFromDevtoolsLog} from '../test-utils.js';
+import wikipediaDevtoolsLog from '../fixtures/wikipedia-redirect.devtoolslog.json';
 
 const HIGH = 'High';
 const VERY_HIGH = 'VeryHigh';
@@ -90,7 +92,7 @@ describe('CriticalRequestChain computed artifact', () => {
     }
 
     const trace = createTestTrace({topLevelTasks: [{ts: 0}]});
-    const devtoolsLog = require('../fixtures/wikipedia-redirect.devtoolslog.json');
+    const devtoolsLog = wikipediaDevtoolsLog;
     const URL = getURLArtifactFromDevtoolsLog(devtoolsLog);
 
     const context = {computedCache: new Map()};
@@ -330,6 +332,37 @@ describe('CriticalRequestChain computed artifact', () => {
       0: {
         request: networkRecords[0],
         children: {},
+      },
+    });
+  });
+
+  it('discards data urls at the end of the chain', async () => {
+    const {networkRecords, criticalChains} = await createChainsFromMockRecords(
+      [HIGH, HIGH, HIGH, HIGH],
+      // (0) main document ->
+      // (1)  data url ->
+      // (2)    network url
+      // (3)    data url
+      [[0, 1], [1, 2], [1, 3]],
+      networkRecords => {
+        networkRecords[1].protocol = 'data';
+        networkRecords[3].protocol = 'data';
+      }
+    );
+    assert.deepEqual(criticalChains, {
+      0: {
+        request: networkRecords[0],
+        children: {
+          1: {
+            request: networkRecords[1],
+            children: {
+              2: {
+                request: networkRecords[2],
+                children: {},
+              },
+            },
+          },
+        },
       },
     });
   });
