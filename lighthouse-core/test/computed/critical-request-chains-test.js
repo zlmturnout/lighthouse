@@ -3,16 +3,18 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
+
 
 /* eslint-env jest */
 
-const assert = require('assert').strict;
-const CriticalRequestChains = require('../../computed/critical-request-chains.js');
-const NetworkRequest = require('../../lib/network-request.js');
-const createTestTrace = require('../create-test-trace.js');
-const networkRecordsToDevtoolsLog = require('../network-records-to-devtools-log.js');
-const {getURLArtifactFromDevtoolsLog} = require('../test-utils.js');
+import {strict as assert} from 'assert';
+
+import CriticalRequestChains from '../../computed/critical-request-chains.js';
+import NetworkRequest from '../../lib/network-request.js';
+import createTestTrace from '../create-test-trace.js';
+import networkRecordsToDevtoolsLog from '../network-records-to-devtools-log.js';
+import {getURLArtifactFromDevtoolsLog} from '../test-utils.js';
+import wikipediaDevtoolsLog from '../fixtures/wikipedia-redirect.devtoolslog.json';
 
 const HIGH = 'High';
 const VERY_HIGH = 'VeryHigh';
@@ -90,7 +92,7 @@ describe('CriticalRequestChain computed artifact', () => {
     }
 
     const trace = createTestTrace({topLevelTasks: [{ts: 0}]});
-    const devtoolsLog = require('../fixtures/wikipedia-redirect.devtoolslog.json');
+    const devtoolsLog = wikipediaDevtoolsLog;
     const URL = getURLArtifactFromDevtoolsLog(devtoolsLog);
 
     const context = {computedCache: new Map()};

@@ -3,15 +3,13 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-'use strict';
 
-const assert = require('assert').strict;
+import {strict as assert} from 'assert';
 
-const Responsiveness = require('../../../computed/metrics/responsiveness.js');
-const createTestTrace = require('../../create-test-trace.js');
-
-const interactionTrace = require('../../fixtures/traces/timespan-responsiveness-m103.trace.json');
-const noInteractionTrace = require('../../fixtures/traces/frame-metrics-m89.json');
+import Responsiveness from '../../../computed/metrics/responsiveness.js';
+import createTestTrace from '../../create-test-trace.js';
+import interactionTrace from '../../fixtures/traces/timespan-responsiveness-m103.trace.json';
+import noInteractionTrace from '../../fixtures/traces/frame-metrics-m89.json';
 
 /* eslint-env jest */
 

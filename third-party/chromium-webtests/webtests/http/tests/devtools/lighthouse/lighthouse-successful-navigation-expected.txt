@@ -3,10 +3,10 @@ Tests that navigation mode works correctly.
 
 ========== Lighthouse Start Audit State ==========
 [x] Performance
-[x] Progressive Web App
-[x] Best practices
 [x] Accessibility
+[x] Best practices
 [x] SEO
+[x] Progressive Web App
 [x] Publisher Ads
 [ ] Legacy navigation
 [x] Clear storage
@@ -33,7 +33,6 @@ Navigating to http://127.0.0.1:8000/devtools/lighthouse/resources/lighthouse-bas
 Computing artifact: NetworkRecords$I
 Get webapp installability errors
 Computing artifact: MainResource$k
-Getting browser version
 Collect stacks
 Computing artifact: ProcessedTrace$g
 Computing artifact: ProcessedNavigation$7
