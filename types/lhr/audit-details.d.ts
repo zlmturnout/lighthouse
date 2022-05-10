@@ -58,7 +58,7 @@ declare module Details {
 
   interface List {
     type: 'list';
-    items: SnippetValue[]
+    items: Array<Table | DebugData>;
   }
 
   interface Opportunity {
